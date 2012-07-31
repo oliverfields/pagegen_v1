@@ -1,0 +1,112 @@
+#!/bin/bash
+
+#------------------------------------------------------------
+# Pagegen - static HTML site generator
+# Copyright (C) 2009  Oliver Fields, oliver@phnd.net
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------
+
+# For given file system path to the item, goto the top level of the menu
+# and list all items, descending into the directories that have
+# been opened
+
+# IFS is by default set to spaces, becuse files and dirs may contain
+# spaces set IFS to new line instead
+IFS=$'\n'
+
+function descend() {
+  local lvl=$1
+  local path=$2
+  current_dir=$(pwd)
+  site_dir=$PAGEGENDIR/$SITE/content/
+  relative_dir=${current_dir#$site_dir}
+ 
+  # For each item in dir list it in menu and if applicaple descend into dir
+  for item in $(ls); do
+    # Good for debug
+    #echo "<span style=\"font-size: 8px;\">[ RELPATH: $relative_dir ITEM: $item -- SELITEM: $selecteditem ]</span>"
+    
+    # If dir then print item and descend into it if dir is in the selected item string
+    if [ -d "$item" ]; then
+      # If item is in selected item path descend into it, else just list
+      if [[ "$selecteditem" =~ $item ]]; then      
+        # If item is the leaf node, i.e. at the very end of the selected
+	      # item path, then we descend into it and show the level
+	      # directly below and emphasize the item
+	      if [ "$selecteditem" = "$relative_dir/$item/default" ]; then
+	        #echo "$lvl D match lastitem $item/default"
+	        echo "<li><a class="item_selected" href=\"$path/$(mkfilename "$item")/\">$(mklinktext "$item")</a>"
+          # If dir contains more than one element, descend into it,
+          if [ "$(ls -1 "$item" | wc -l)" -gt 1 ]; then           
+            echo "<ul>"
+            cd "$item"
+            lvl=$(expr $lvl + 1)
+            descend $lvl "$path/$(mkfilename "$item")"
+            lvl=$(expr $lvl - 1)
+            cd ..
+            echo "</ul>"
+          fi
+	        echo "</li>"
+	      else
+	        #echo "$lvl D match notlastitem $item/default"
+	        echo "<li><a href=\"$path/$(mkfilename "$item")/\">$(mklinktext "$item")</a>"
+	        echo "<ul>"
+          cd "$item"
+          lvl=$(expr $lvl + 1)
+          descend $lvl "$path/$(mkfilename "$item")"
+          lvl=$(expr $lvl - 1)
+          cd ..
+	        echo "</ul>"
+	        echo "</li>"
+	      fi
+      else
+        #echo "$lvl D no_match $item"
+        echo "<li><a href=\"$path/$(mkfilename "$item")/\">$(mklinktext "$item")</a></li>"
+      fi
+    else
+      # Only display file if it is not named default
+      if ! [ "$item" = "default" ]; then
+        # If item is the leaf node, i.e. at the very end of the selected
+        # item path and it must be emphasized
+        if [ "$selecteditem" = "$relative_dir/$item" ]; then
+          #echo "$lvl F lastitem $item" 
+          echo "<li><a class=\"item_selected\" href=\"$path/$(mkfilename "$item")\">$(mklinktext "$item")</a></li>"
+        else
+          #echo "$lvl F notlastitem $item"
+          echo "<li><a href=\"$path/$(mkfilename "$item")\">$(mklinktext "$item")</a></li>"
+        fi
+      fi
+    fi
+  done
+}
+
+selecteditem="$1"
+rootitem=$(echo "$selecteditem" | cut -d'/' -f1)
+echo "<ul id=\"submenu\">"
+# If the selected item does contains slashes (/) then it need
+# not be emphasized 
+if [[ "$selecteditem" = "$rootitem/default" ]]; then      
+  #echo "0 D match notlastitem $rootitem/default $selecteditem"
+  echo "<li><a class=\"item_selected\" href=\"/$(mkfilename "$rootitem")/\">$(mklinktext "$rootitem")</a>"
+else
+  #echo "0 D match lastitem $rootitem/default $selecteditem"
+  echo "<li><a href=\"/$(mkfilename "$rootitem")/\">$(mklinktext "$rootitem")</a>"
+fi
+echo "<ul>"
+cd "$SOURCEDIR/content/$(echo "$selecteditem" | cut -d'/' -f1)"
+descend 1 "/$(mkfilename "$rootitem")"
+echo "</ul>"
+echo "</li>"
+echo "</ul><!-- /submenu -->"

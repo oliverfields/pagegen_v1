@@ -1,0 +1,112 @@
+<p>When the site is generated each page will contain a main menu, sub menu and crumb trail (unless the sub menu and/or crumb trail are disabled in the <strong>site.conf</strong>).</p>
+
+<p>The generated menus can be tweaked using CSS and/or Javascript and allow for some of standard navigational layouts. All examples below refer to the following directory structure.</p>
+
+<p class="pg_warning">A directory must always contain a file called default.</p>
+
+<p class="pg_notice">All items, except the default files, can be prefixed with 3 digits and an underscore, e.g. <strong>010_</strong> to specify order in menus. All menu items are sorted alphabetically, so the 3 digit prefix and underscore allows items to be sorted as the user wants.</p>
+
+
+<h2>Example site(directory) structure</h2>
+
+<table>
+<tr><th>Level 1</th><th>Level 2</th><th>Level 3</th><th>Level 4</th></tr>
+<tr><td>Directory 1</td><td></td><td></td><td></td></tr>
+<tr><td></td><td>default</td><td></td><td></td></tr>
+<tr><td>Directory 2</td><td></td><td></td><td></td></tr>
+<tr><td></td><td>default</td><td></td><td></td></tr>
+<tr><td></td><td>File 2.1</td><td></td><td></td></tr>
+<tr><td></td><td>File 2.2</td><td></td><td></td></tr>
+<tr><td>Directory 3</td><td></td><td></td><td></td></tr>
+<tr><td></td><td>default</td><td></td><td></td></tr>
+<tr><td></td><td>Directory 3.1</td><td></td><td></td></tr>
+<tr><td></td><td></td><td>default</td><td></td></tr>
+<tr><td></td><td></td><td>File 3.1.1</td><td></td></tr>
+<tr><td></td><td></td><td>Directory 3.1.2</td><td></td></tr>
+<tr><td></td><td></td><td></td><td>default</td></tr>
+<tr><td></td><td></td><td></td><td>File 3.1.2.1</td></tr>
+<tr><td></td><td></td><td>Directory 3.1.3</td></tr>
+<tr><td></td><td></td><td></td><td>default</td></tr>
+<tr><td></td><td></td><td></td><td>File 3.1.3.1</td></tr>
+
+</table>
+
+<h2>Main menu</h2>
+
+<p>The main menu consists of all directories found in level 1 and all items found in level 2. For each page the appropriate section and menu item is indicated by a class attribute.</p>
+
+<p>The main menu that would be generated page <strong>File 2.1</strong> in the example above would be as follows.</p>
+
+<pre>
+ 1  &#60;div id="mainmenu"&#62;
+ 2    &#60;ul&#62;
+ 3      &#60;li class="section"&#62;&#60;a href="/directory_1/"&#62;Directory 1&#60;/a&#62;&#60;/li&#62;
+ 4      &#60;li class="section_selected"&#62;&#60;a href="/directory_2/"&#62;Directory 2&#60;/a&#62;
+ 5        &#60;ul&#62;
+ 6          &#60;li&#62;&#60;a class="item_selected" href="/directory_2/file_2.1"&#62;File 2.1&#60;/a&#62;&#60;/li&#62;
+ 7          &#60;li&#62;&#60;a href="/directory_2/file_2.2"&#62;File 2.2&#60;/a&#62;&#60;/li&#62;
+ 8        &#60;/ul&#62;
+ 9      &#60;/li&#62;
+ 10     &#60;li class="section"&#62;&#60;a href="/directory_3/"&#62;Directory 3&#60;/a&#62;
+ 11       &#60;ul&#62;
+ 12         &#60;li&#62;&#60;a href="/directory_3/directory_3.1/"&#62;Directory 3.1&#60;/a&#62;&#60;/li&#62;
+ 13       &#60;/ul&#62;
+ 14     &#60;/li&#62;
+ 15   &#60;/ul&#62;
+ 16 &#60;/div&#62;
+
+</pre>
+<p>Notice the href attribute for the <strong>Directory links</strong>, they assume that the default index file on the web server is called <strong>default</strong>. See <a href="/user_manual/web_server_setup">Web server setup</a> for more information.</p>
+
+<p>Please note that class attribute of the &#60;li&#62; tag on line 4 is <strong>section_selected</strong> whilst for the other items at this level it is <strong>section</strong>. Similarly on line 6 the class attribute is <strong>item_selected</strong>. The <strong>section_selected</strong> class will always be set on the appropriate tag, whilst the <strong>item_selected</strong> will only be set if the page is in either level 1 or 2 (see example above).</p>
+
+
+<h2>Sub menu</h2>
+
+<p>The sub menu lists items from level 1, but only listing the contents of the directories required to display the current item.</p>
+
+<p>The sub menu that would be generated for page <strong>File 3.1.2.1</strong> in the example above would be as follows.</p>
+
+<pre>
+ 1  &#60;ul id="submenu"&#62;
+ 2    &#60;li&#62;
+ 3      &#60;a href="/directory_3/"&#62;Directory 3&#60;/a&#62;
+ 4      &#60;ul&#62;
+ 5        &#60;li&#62;
+ 6          &#60;a href="/directory_3/directory_3.1/"&#62;Directory 3.1&#60;/a&#62;
+ 7          &#60;ul&#62;
+ 8            &#60;li&#62;
+ 9              &#60;a href="/directory_3/directory_3.1/file_3.1.1"&#62;File 3.1.1&#60;/a&#62;
+ 10           &#60;/li&#62;
+ 11           &#60;li&#62;
+ 12             &#60;a href="/directory_3/directory_3.1/directory_3.1.2/"&#62;Directory 3.1.2&#60;/a&#62;
+ 13             &#60;ul&#62;
+ 14               &#60;li&#62;
+ 15                 &#60;a class="item_selected" href="/directory_3/directory_3.1/directory_3.1.2/file_3.1.2.1"&#62;File 3.1.2.1&#60;/a&#62;
+ 16               &#60;/li&#62;
+ 17             &#60;/ul&#62;
+ 18           &#60;/li&#62;
+ 19           &#60;li&#62;
+ 20             &#60;a href="/directory_3/directory_3.1/directory_3.1.3/"&#62;Directory 3.1.3&#60;/a&#62;
+ 21           &#60;/li&#62;
+ 22         &#60;/ul&#62;
+ 23       &#60;/li&#62;
+ 24     &#60;/ul&#62;
+ 25   &#60;/li&#62;
+ 26 &#60;/ul&#62;
+
+</pre>
+<p>Please note that on line 15 the &#60;a&#62; tag class attribute is <strong>item_selected</strong> and that Directory 3.1.3 has not been expanded.</p>
+
+
+<h2>Crumb trail</h2>
+
+<p>The crumb trail lists the &#34;directory path&#34; to the current item. The crumb trail to <strong>File 2.2</strong> would be as follows.</p>
+
+<pre>
+ 1 &#60;div id="crumbtrail"&#62;
+ 2   &#60;a href="/"&#62;Home&#60;/a&#62; &#62;
+ 3   &#60;a href="/directory_2/"&#62;Directory 2&#60;/a&#62; &#62;
+ 4   &#60;a href="/directory_2/file_2.2"&#62;File 2.2&#60;/a&#62;
+ 5 &#60;/div&#62;
+</pre>

@@ -1,0 +1,5 @@
+<p><a name="hello">This is an anchor point on the page</a></p>
+<h1><a name="hello">This is a anchor point in header 1</a></h1>
+<h2><a name="hello">This is a anchor point in header 2</a></h2>
+<h3><a name="hello">This is a anchor point in header 3</a></h3>
+<h4><a name="hello">This is a anchor point in header 4</a></h4>

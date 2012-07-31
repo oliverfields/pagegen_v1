@@ -1,0 +1,98 @@
+#!/bin/bash
+
+#------------------------------------------------------------
+# Pagegen - static HTML site generator
+# Copyright (C) 2009  Oliver Fields, oliver@phnd.net
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------
+
+# Usage: main_menu [selected menu section] [selected menu item]
+
+selecteddir="$1"
+selecteditem="$2"
+
+# IFS is by default set to spaces, becuse files and dirs may contain
+# spaces set IFS to new line instead
+IFS=$'\n'
+
+# Goto working directory
+cd $SOURCEDIR/content
+
+echo "<div id=\"mainmenu\">"
+
+if [ "$add_accessibility_bookmarks" = "1" ]; then
+  # Add anchor bookmark tag, usefull for accessibility
+  echo '<a name="main_menu_bookmark" id="main_menu_bookmark">Main menu</a>'
+fi
+
+echo "<ul>"
+
+# Unless explicitly set that home option should be omitted in site.conf
+# then include it
+if ! [ "$omit_home_from_main_menu" = "1" ]; then
+  # Menu item to link to home page
+  # If no selected dir set the Home item as selected
+  if [ "$selecteddir" = "" ]; then
+    echo "<li class=\"section_title_selected\">"
+  else
+    echo "<li class=\"section_title\">"
+  fi
+  echo "<a href=\"/\">Home</a></li>"
+fi
+
+# For each dir directly beneath content/ create a main menu dropdown menu
+for dir in $(ls -d *); do
+  # If directory
+  if [ -d "$dir" ]; then
+    if [ "$selecteddir" = "$dir" ]; then
+      echo "<li class=\"section_selected\">"
+    else
+      echo "<li class=\"section\">"
+    fi
+
+    if [ "$dir/default" = "$selecteditem" ]; then
+      echo "<a class=\"item_selected\" href=\"/$("$PAGEGEN_LIB_DIR/mkfilename" "$dir")/\">$("$PAGEGEN_LIB_DIR/mklinktext" "$dir")</a>"
+    else
+      echo "<a href=\"/$("$PAGEGEN_LIB_DIR/mkfilename" "$dir")/\">$("$PAGEGEN_LIB_DIR/mklinktext" "$dir")</a>"
+    fi
+
+    numChildren=$(ls "$dir" | wc -l) 
+    if [ $numChildren -gt 1 ]; then
+      echo "<ul>"
+      for item in $(ls "$dir"); do
+        if [ -f "$dir/$item" ]; then
+          if [ "$item" != "default" ]; then
+            if [ "$item" = "$selecteditem" ]; then
+              echo "<li><a class=\"item_selected\" href=\"/$("$PAGEGEN_LIB_DIR/mkfilename" "$dir/$item")\">$("$PAGEGEN_LIB_DIR/mklinktext" "$item")</a></li>"
+            else            
+              echo "<li><a href=\"/$("$PAGEGEN_LIB_DIR/mkfilename" "$dir/$item")\">$("$PAGEGEN_LIB_DIR/mklinktext" "$item")</a></li>"
+            fi
+          fi
+        elif [ -d "$dir/$item" ]; then
+          if [ "$item/default" = "$selecteditem" ]; then
+            echo "<li><a class=\"item_selected\" href=\"/$("$PAGEGEN_LIB_DIR/mkfilename" "$dir/$item")/\">$("$PAGEGEN_LIB_DIR/mklinktext" "$item")</a></li>"
+          else
+            echo "<li><a href=\"/$("$PAGEGEN_LIB_DIR/mkfilename" "$dir/$item")/\">$("$PAGEGEN_LIB_DIR/mklinktext" "$item")</a></li>"
+          fi
+        fi
+      done
+      echo "</ul>"
+    fi
+
+    echo "</li>"
+  fi
+done
+echo "</ul>"
+echo "</div><!-- /mainmenu -->"

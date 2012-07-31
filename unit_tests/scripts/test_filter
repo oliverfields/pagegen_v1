@@ -1,0 +1,165 @@
+#!/bin/bash
+#
+# Pass *.input files to supplied filter and alert if output
+# does not match *.expected_output file
+
+function msg {
+  echo "[$filter_name] $1" >&2
+  
+  if ! [ "$2" = "" ]; then
+    exit $2
+  fi
+}
+
+function usage {
+  echo "Usage: $(basename $0) -f|--filter <path to filter> [-t|--test_dir <path to test case directory> | -s|--test_file <test output file> ] [ -p|-filter_params <parameters for filter>] [-i|--ignore_input_file]" >&2
+  exit 1
+}
+
+function print_filter_params {
+  for param in "${filter_params[@]}"; do                                    
+    printf "\"$param\" "
+  done
+}
+
+failed_tests=0
+
+while [ $# -gt 0 ]; do
+  case $1 in
+    -f | --filter)
+      if [ "$2" = "" ]; then
+        usage
+      else
+        filter="$2" 
+        shift 2
+      fi
+    ;;
+    -t | --test_dir)
+      if [ "$2" = "" ]; then
+        usage
+      else
+        test_dir="$2" 
+        shift 2
+      fi
+    ;;
+    -p | --filter_params)
+      if [ "$2" = "" ]; then                                                
+        usage
+      else
+        shift 1
+        while ! [ "$1" = ";" ] && [ $# -gt 0 ]; do
+          filter_params=("${filter_params[@]}" "$1")
+          shift 1
+        done
+        if [ "$1" = ";" ]; then
+          shift 1
+        fi
+      fi
+    ;;
+    -s | --test_file)
+      if [ "$2" = "" ]; then
+        usage
+      else
+        test_file="$2"
+        shift 2
+      fi
+    ;;
+    -i | --ignore_input_file)
+      ignore_input_file=1
+      shift 1
+    ;;
+    *)
+      usage
+    ;;
+  esac
+done
+
+# Check filter set
+if ! [ "$filter" ];then
+  usage
+fi
+
+# Check filter is executable
+if ! [ -e "$filter" ]; then
+  msg "Error: Filter '$filter' was not found or is not executable" 1
+fi
+
+# Check we have either a test_dir or test_file param
+if [ "$test_dir" = "" ]; then
+  if [ "$test_file" = "" ]; then
+    usage
+  fi
+fi
+
+# If test_dir specified
+if ! [ "$test_dir" = "" ]; then
+  filter_name="$(basename "$test_dir")"
+
+  # Check test dir is readable
+  if ! [ -r "$test_dir" ]; then
+    msg "Error: Directory '$test_dir' was not found or is not readable" 1
+  fi
+
+  # Check tests exist in test_dir
+  exp_out_file_count=$(ls $test_dir/*.expected_output 2> /dev/null | wc -l)
+  if [ $exp_out_file_count -eq 0 ]; then
+    msg "Error: No tests found in '$test_dir'" 1 
+  fi
+
+  # Pipe .input files to filter and complain if filter output does
+  # not match .expected_output file
+  cd "$test_dir"
+  test_list='ls *.expected_output'
+
+# If test_file specified
+elif ! [ "$test_file" = "" ]; then
+  filter_name=$(basename "$test_file")
+  # Check file is readable and exists
+  if ! [ -r "$test_file" ]; then
+    msg "Error: File '$test_file' was not found or is not readable" 1
+  fi
+  test_list="echo $test_file"
+  cd "$(dirname "$test_file")"
+fi
+
+for output_file in $(eval "$test_list"); do
+  test_result=0   
+ 
+  # Check output file readable
+  if ! [ -r "$output_file" ]; then
+    msg "Error: Unable to read '$output_file'" 1
+  fi
+
+  if ! [ "$ignore_input_file" = "1" ]; then 
+    input_file=${output_file%.expected_output}.input
+    
+    # Check input file exists and is readable
+    if [ -e "$input_file" ]; then
+      if ! [ -r "$input_file" ]; then
+        msg "Error: '$input_file' is not readable" 1
+      fi
+    else
+      msg "Warning: '$output_file' is missing '$input_file'"
+      continue
+    fi
+  fi
+
+  expected_output=$(cat "$output_file")
+
+  if [ "$ignore_input_file" = "1" ]; then
+    eval $(echo "\"$filter\" $(print_filter_params) | diff \"$output_file\" - > /dev/null")
+    test_result=$?
+  else
+    # Pipe input file to filter and compare using diff
+    eval $(echo "\"$filter\" $(print_filter_params) < \"$input_file\" | diff \"$output_file\" - > /dev/null")
+    test_result=$?
+  fi
+  
+  # Record failure  
+  if [ $test_result -ne 0  ]; then
+      msg "Fail: '$output_file'"
+      failed_tests=1
+    fi
+done 
+
+exit $failed_tests 

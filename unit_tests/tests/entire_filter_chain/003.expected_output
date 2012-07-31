@@ -1,0 +1,25 @@
+<p>There are two configuration files that affect the way Pagegen generates files, they are:</p>
+<ul>
+<li>
+<strong>[Pagegen directory]/bin/pagegen.conf</strong>
+</li>
+<li>
+<strong>[Site directory]/site.conf</strong>
+
+</li>
+</ul>
+<p>The format is <strong>Key=Value</strong>, and <strong>#</strong> to comment. The files accept the same settings. To set options globally use <strong>pagegen.conf</strong> and for site specific use <strong>site.conf</strong>. If settings are set in both files the setting from the <strong>site.conf</strong> will be used. Currently the following settings are available.</p>
+
+<table>
+<tr><th>Setting name</th><th>Setting values</th><th>Description</th></tr>
+<tr><td>add_accessibility_bookmarks</td><td>1 or 0</td><td>If <strong>1</strong> then bookmarks are added to the main menu and content, to facilitate accessibility</td></tr>
+<tr><td>create_sitemap_xml</td><td>1 or 0</td><td>If <strong>1</strong> a sitemap.xml will be created and added to the web root folder. Must also set <strong>sitemap_page_base_url</strong></td></tr>
+<tr><td>filter_svn_dirs</td><td>1 or 0</td><td>If <strong>1</strong> then .svn directories will not be included in output. Note that if used with the <strong>symlink_site_include_dir</strong> setting any .svn directories in the include directory will not be removed (that would mean loosing any revision control that was put on the include directory)</td></tr>
+<tr><td>omit_crumb_trail</td><td>1 or 0</td><td>If <strong>1</strong> then the crumb trail is not included in output</td></tr>
+<tr><td>omit_home_from_main_menu</td><td>1 or 0</td><td>If <strong>1</strong> then the Home link is not included in the main menu</td></tr>
+<tr><td>omit_last_changed</td><td>1 or 0</td><td>If <strong>1</strong> then the last changed string is not included in output</td></tr>
+<tr><td>omit_sub_menu</td><td>1  or 0</td><td>If <strong>1</strong> the section menu is not included in output</td></tr>
+<tr><td>place_navigation_after_content</td><td>1 or 0</td><td>If <strong>1</strong> then the navigational elements are placed after the content in the HTML file, useful for creating accessible pages</td></tr>
+<tr><td>sitemap_page_base_url</td><td>Site URL</td><td>Used to generate proper links for the sitemap.xml</td></tr>
+<tr><td>symlink_site_include_dir</td><td>1 or 0</td><td>If <strong>1</strong> then instead of copying the <strong>[site directory]/include</strong> directory to the output folder, a symlink is made instead</td></tr>
+</table>

@@ -1,0 +1,12 @@
+h2 HTML templates
+
+There are two HTML template files, **[site directory]/templates/header** and **[site directory]/templates/footer**, upon generation of the site the header is added before the content, and the footer naturally after.
+
+If the header and footer are executable their output will be used instead of the actual file contents. Executable template files have any variables set in **[site directory]/content_variables/&#42;**, the **page_title** and/or any variables set in the content page header available for use (see "Dynamic content":"/user_manual/dynamic_content" for more information).
+
+In addition to the template files Pagegen adds a **&#60;div&#62;** tag around the page content. The tag's **id** attribute will be **frontpage_content** for the front page and for all other pages the **id** will be **content**. 
+
+
+h2 CSS, Javascript and images
+
+When generating the site all contents in the **[site directory]/include** directory are either copied(default) or symlinked to the output folder (see "Site configuration":"/user_manual/site_configuration"). Add CSS, Javascript and images (or anything else) to this directory to have them included with the generated site.

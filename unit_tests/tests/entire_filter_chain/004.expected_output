@@ -1,0 +1,17 @@
+<p>Run <strong>[Pagegen directory]/bin/mksite [site name]</strong> the generated HTML files will be in the <strong>[Pagegen directory]/[site directory]/site/live</strong>, simply copy this directory to your web root to go live:)</p>
+
+
+<h2>Pagegen file structure</h2>
+
+<p>Each generated page has the following structure.</p>
+
+<table>
+<tr><th>Name</th><th>Source</th><th>Description</th></tr>
+<tr><td>Header</td><td>[site directory]/templates/header</td><td>Start of HTML document</td></tr>
+<tr><td>Main menu</td><td>Generated HTML</td><td>List of links to pages found in all immediate child directories from the <strong>content</strong> directory (one directory below)</td></tr>
+<tr><td>Sub menu</td><td>Generated HTML</td><td>For each child directory of <strong>content</strong> show links from the current page to the top child directory</td></tr>
+<tr><td>Crumb trail</td><td>Generated HTML</td><td>Crumb trail for each page</td></tr>
+<tr><td>Last changed date</td><td>Generated HTML</td><td>Show modification time of content files</td></tr>
+<tr><td>Content files</td><td>[site directory]/content/*</td><td>The actual site content</td></tr>
+<tr><td>Footer</td><td>[site directory]/templates/footer</td><td>End of HTML document</td></tr>
+</table>

@@ -1,0 +1,3 @@
+Referencing the variable '\$test_var_1' should show 'Yay': $test_var_1
+'\$test_var_2' should show 'Hoi hoi!': $test_var_2
+$test_var_3 is the value of '\$test_var_3'

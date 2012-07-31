@@ -1,0 +1,80 @@
+#!/bin/bash
+
+#------------------------------------------------------------
+# Pagegen - static HTML site generator
+# Copyright (C) 2009  Oliver Fields, oliver@phnd.net
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------
+
+
+n=0 # Line number
+
+while read line; do
+  i=0 # Char position
+  n=$(expr $n + 1)
+
+  # Check each charachter in line
+  while [ $i -lt ${#line} ]; do
+    char=${line:$i:1}
+
+    # If the current char is a % check if the next is
+    # a letter and the following is a %, if so we have a 
+    # variable:)
+    if [ "$char" = "%" ]; then
+      x=$(expr $i + 1)
+      if [[ ${line:$x:1} =~ [a-z] ]]; then
+        y=$(expr $i + 2)
+        if [[ ${line:$y:1} =~ '%' ]]; then
+          # Move counter so it starts next pass after variable
+          #i=$(expr $i + 2)
+          variable=${line:$x:1}
+          #echo "Success found variable '${line:$x:1}' on line $n"
+
+          if [[ "$var_register" =~ "$variable" ]]; then
+            #echo "  Variable '$variable' already registered, incrementing"
+          
+            var_reg_temp=
+            for var in $var_register; do
+              var_name=$(echo "$var" | cut -d':' -f1)
+              var_count=$(echo "$var" | cut -d':' -f2)
+
+              # If the variable matches, increment its count
+              if [ "$variable" = "$var_name" ]; then
+                var_count=$[$var_count+1]
+                #echo "  Variable '$variable' has appeared $var_count times"
+                # Replace variable with count value
+                new_line=${line/\%$variable\%/$var_count}
+                line=$new_line
+              fi
+              var_reg_temp="$var_reg_temp $var_name:$var_count "
+            done
+            var_register="$var_reg_temp"
+          else
+            #echo "  Variable '$variable' not registered, registering"
+            var_register=$(echo "$var_register ${variable}:1")
+            var_count=1
+            #echo "  Variable '$variable' has appeared $var_count times"
+            # Replace variable with count value
+            new_line=${line/\%$variable\%/$var_count}
+            line=$new_line
+          fi
+        fi
+      fi
+    fi
+    i=$[$i+1]
+  done
+  echo "$line"
+done
+#echo "$var_register"

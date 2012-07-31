@@ -1,0 +1,19 @@
+<p id="test_id">This line contains html tags, so don&#39;t touch it</p>
+
+<ol>
+<li>
+<a href="/download/">Download</a> Pagegen and unpack to a directory
+</li>
+<li>
+Ensure all files in the unpacked <strong>bin</strong> directory are executable (e.g. <tt>chmod 777 [unpacked dir]/bin/*</tt>)
+</li>
+<li>
+Edit <strong>[unpacked directory]/bin/pagegen.conf</strong> and set the <strong>PAGEGENDIR</strong> variable to <strong>[unpacked directory]/bin</strong>
+</li>
+<li>
+Create a directory to contain your site in the directory where you unpacked Pagegen (e.g. <tt>mkdir [unpacked dir]/my_site</tt>)
+</li>
+<li>
+Run <tt>[unpacked directory]/bin/mksite my_site</tt> to generate the required files and directories
+</li>
+</ol>

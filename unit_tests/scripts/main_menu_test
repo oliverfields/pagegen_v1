@@ -1,0 +1,13 @@
+#!/bin/bash
+# Setup environment for testing main_menu 
+
+# Basic menu test
+"$scripts_dir/test_filter" -f "$PAGEGEN_LIB_DIR/main_menu" -s "$tests_dir/main_menu/basic_menu.expected_output" -i || test_error=1
+
+# Selected section test
+"$scripts_dir/test_filter" -f "$PAGEGEN_LIB_DIR/main_menu" -p "000_Dir 1" \; -s "$tests_dir/main_menu/section_selected.expected_output" -i || test_error=1
+
+# Selected section and item test
+"$scripts_dir/test_filter" -f "$PAGEGEN_LIB_DIR/main_menu" -p "000_Dir 1" "File 1" \; -s "$tests_dir/main_menu/section_and_item_selected.expected_output" -i || test_error=1
+
+exit 0

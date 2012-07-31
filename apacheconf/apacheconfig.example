@@ -1,0 +1,35 @@
+<VirtualHost *>
+	ServerName pagegen.phnd.net
+
+	ServerAdmin webmaster@localhost
+	
+	DocumentRoot /var/www/pagegen.phnd.net/public
+
+	RewriteEngine On
+
+	ErrorLog /var/log/apache2/error.log
+
+	# Possible values include: debug, info, notice, warn, error, crit,
+	# alert, emerg.
+	LogLevel warn
+
+	CustomLog /var/log/apache2/access.log combined
+
+	ServerSignature Off
+
+	<Directory /var/www/pagegen.phnd.net/public>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride None
+		Order allow,deny
+		allow from all
+		ForceType text/html
+	</Directory>
+
+	<Directory /var/www/pagegen.phnd.net/public/include>
+		ForceType none
+	</Directory>
+
+	<Location /include/css>
+		ForceType none
+	</Location>
+</VirtualHost>

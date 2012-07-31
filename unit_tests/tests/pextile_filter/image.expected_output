@@ -1,0 +1,4 @@
+<img alt="Alternative text no align" src="the_image_src"/>
+<img class="pg_img_left" alt="Left aligned" src="the_image_src"/>
+<img class="pg_img_right" alt="Right aligned" src="the_image_src"/>
+<p>An image in some text <img alt="Alt text" src="the_image_src"/>. Does this work then?</p>

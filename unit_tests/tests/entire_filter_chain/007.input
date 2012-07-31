@@ -1,0 +1,57 @@
+Though the final site will be static HTML, the content may be dynamically created when it is generated.
+
+
+h2 Executable content pages
+
+When generating content Pagegen will first check if the content file is executable, if it is the file will be run and the output used, if not the file will be parsed as pextile markup. I.e. the content file could be a shell script that produces HTML.
+
+
+h2 Incremental variables
+
+For non-executable content files it is possible to add incremental variables. An incremental variable will increment by 1 each time it is used. To use enter **%[single letter]%** anywhere in the content file.
+
+The following content file..
+
+> Hello I'm an incremental variable &#37;a&#37;, and I'm &#37;b&#37;
+> I started as 1, but now I've become &#37;a&#37; 
+
+..will become:
+
+> Hello I'm an incremental variable 1, and I'm 1
+> I started as 1, but now I've become 2 
+
+
+h2 Content variables
+
+On site generation all files in **[site directory]/content_variables** will be parsed and the variables made available for use in all content pages that are not executable. The format is **key=value**.
+
+For instance if the file **[site directory]/content_variables/company_names** includes a line consisting of **my_company=My Very Own Inc.** then all occurrences of **&#36;my_company** in the content files will be replaced by **My Very Own Inc.**.
+
+
+h2 Page variables
+
+Content pages that are not scripts/executables may contain an optional header part in order to set certain attributes. The header section consists of key/values followed by a line containing only **=====** (five equals signs).
+
+The key/values can be used by the header, footer or in the content page itself by specifying **&#36;[key name]**.
+
+> var1=Hello
+> var2=World
+> =====
+> &#36;{var1} &#36;{var2}!!
+
+When the page is generated it will become:
+
+> Hello World!!
+
+The variables defined in the page header are available as environment variables to the header and footer templates. For the template to make use of the variable it must be executable and setup to do something with the variable.
+
+
+h2 Page title
+
+Default is to set the page title to the same as the file/directory name, this may be overridden by specifying a value for **page_title** in the page header section, e.g.:
+
+> page_title=Override the default title with this one:)
+> =====
+> h2 Normal content
+
+The **&#36;page_title** variable is also available as an environment variable for executable header and footer templates. If the template is executable it could be used to e.g. set the page title tag to the **&#36;page_title** variable.

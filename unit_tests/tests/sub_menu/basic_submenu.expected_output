@@ -1,0 +1,11 @@
+<ul id="submenu">
+<li><a href="/dir-1/">Dir 1</a>
+<ul>
+<li><a href="/dir-1/dir-1/">Dir 1</a>
+<ul>
+</ul>
+</li>
+<li><a href="/dir-1/file-1">File 1</a></li>
+</ul>
+</li>
+</ul><!-- /submenu -->

@@ -1,0 +1,5 @@
+"This is an anchor point on the page":"name:hello"
+h1 "This is a anchor point in header 1":"name:hello"
+h2 "This is a anchor point in header 2":"name:hello"
+h3 "This is a anchor point in header 3":"name:hello"
+h4 "This is a anchor point in header 4":"name:hello"

@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#------------------------------------------------------------
+# Pagegen - static HTML site generator
+# Copyright (C) 2009  Oliver Fields, oliver@phnd.net
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------
+
+#
+# strip out header info from file 
+
+# If file contains header sperator (A line containing exactly 5 '=')
+# Strip the header, else if there is no header
+# just print file
+grep -q -e '^=====$' "/dev/stdin"
+if [ "$?" = "0" ]; then
+  inheader=1
+  while read line; do
+    if [ "$inheader" = '0' ]; then
+      echo "$line"
+    fi
+    # If we get to seperator set inheader so that the next lines
+    # are printed
+    if [[ "$line" =~ '=====' ]]; then
+      inheader=0
+    fi
+  done < "/dev/stdin"
+else
+  cat /dev/stdin
+fi

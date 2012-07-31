@@ -1,0 +1,28 @@
+.TH PAGEGEN 1 "" "1.00"
+.\" ===================================================
+.SH NAME
+pagegen \(em static web site generator
+.\" ===================================================
+.SH SYNOPSIS
+.B pagegen
+.B OPTION
+<site_name>
+.\" ===================================================
+.SH OPTIONS
+.\" ---------------------------------------------------
+.TP
+.B gen <site_name>
+Generate the site. Generated HTML will be placed in the '[site_directory]/site/live' directory.
+.\" ---------------------------------------------------
+.TP
+.B new <site_name>
+Setup the required directories and files for a new site.
+.\" ---------------------------------------------------
+.TP
+.B list
+Lists the existing sites 
+.\" ===================================================
+.SH DESCRIPTION
+A static web site generator processes input and produces regular web site files, such as .html, .css, .js etc. Pagegen uses flat text files and directories to order and store it's input. When a site is generated Pagegen processes the input adding site menues, headers and footers etc all ready to be uploaded to a web server.
+
+Please see http://pagegen.phnd.net for complete documentation.

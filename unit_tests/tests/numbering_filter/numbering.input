@@ -1,0 +1,5 @@
+This is variable 'a', and 'a' is currently %a%. Variable 'b' is %b% 
+However on this line 'a' has become %a%
+%a% is now the value of 'a', while 'b' is %b%
+
+'c' likes the value %c%

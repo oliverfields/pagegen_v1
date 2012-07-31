@@ -1,0 +1,103 @@
+#!/bin/bash
+
+#------------------------------------------------------------
+# Pagegen - static HTML site generator
+# Copyright (C) 2009  Oliver Fields, oliver@phnd.net
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------
+
+# Parse a tab indendet sitemap to create script for pagegen
+# The sitemap format is
+# Dir
+#	File
+#	File
+#	Dir
+#		File
+#		File
+# Please note that a directory will automatically have a page (default)
+# generated and placed in it. All leafnodes are files.
+# The output of this script can be used to build a content directory for
+# pagegen
+#
+# Usage: parsesitemap [Tab indendet sitemap file]
+
+# Create directory name in format NNN_aaaaaa..., also remove / if present
+# and script
+function createdir {
+  prefix=$1
+  dir=$(echo "$2" | sed 's/^;*//')
+  dir="$prefix $dir"
+  dir=$(echo "$dir" | sed 's/\ /_/' | sed 's/\///g')
+  echo "mkdir \"$dir\""
+  echo "cd \"$dir\""
+  echo "touch \"default\""
+}
+ 
+# Create file name in format NNN_aaaaaa..., also remove / if present
+# and script
+function createfile {
+  prefix=$1
+  file=$(echo "$2" | sed 's/^;*//')
+  file="$prefix $file"
+  file=$(echo "$file" | sed 's/\ /_/' | sed 's/\///g')
+  echo "touch \"$file\""
+}
+
+# Add EOF to mark end of file, 
+# so that all items in file are processed
+# (last line is not included in output)
+lastitem=""
+lastlevel=0
+count=1
+printf "$(cat $1)\nEOF\n" | sed 's/\t/;/g' | sed 's/;*$//g' | while read line; do
+
+  # Count ; in line to determine item level
+  thislevel=$(echo $line | tr -cd ";" | wc -c)
+  
+  # Set thislevel and remove trailing delimeters
+  thisitem=$(echo "$line" | sed 's/;*$//g')
+
+  # Debug
+  #echo "lastlevel: $lastlevel | lastitem: $lastitem"
+  #echo "thislevel: $thislevel | thisitem: $thisitem"
+  #echo ""
+  
+  # If lastitem empty do nothing as we are on the first line of the file
+  if [ "$lastitem" != "" ]; then
+    # lastitem is a dir directly above
+    if [ "$lastlevel" == "$(expr $thislevel - 1)" ]; then
+      createdir $count "$lastitem"
+    # Else if this item is a dir above current dir, ascend up to same level
+    elif [ "$thislevel" -lt "$lastlevel" ]; then
+      createfile $count "$lastitem"
+      limit=$(expr $lastlevel - $thislevel)
+      for ((x=0; x < limit; x++)) do
+        echo "cd .."
+      done
+    # Else the item is a regular file  
+    else
+      createfile $count "$lastitem"
+    fi
+  fi
+  lastitem="$thisitem"
+  lastlevel="$thislevel"
+  count=$(expr $count + 1)
+  #Zero pad count, as it is used for sorting
+  if [ "$count" -lt 10 ]; then
+    count="00$count"
+  elif [ $count -lt 100 ]; then
+    count="0$count"
+  fi
+done

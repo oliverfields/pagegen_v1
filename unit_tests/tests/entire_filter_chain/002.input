@@ -1,0 +1,35 @@
+sitemap_page_priority=1
+=====
+Content is stored as regular files and is organized by putting the files in directories.
+
+
+h2 Content structure
+
+warning All directories must contain a file called **default**
+
+All content is stored in the **content directory** (@@[Pagegen directory]/[site directory]/content@@). 
+
+To and organize content pages add new text files and directories to the **content** directory. The name of the file/directory will be the page title, so use human readable names. All directories must contain a file called **default**. 
+
+notice Pagegen will generate nice URLs from the file and directory names. For instance the directory and file 'About us/Contact' will get the URL 'about_us/contact'.
+
+notice The front page is **content/default**
+
+
+h2 Page title and URL
+
+When Pagegen generates pages the page title becomes the file or directory name (without the sort prefix **XXX_** if present, see below), this means the names used is important, if you want a title 'Apples are nice' the file must be called 'Apples are nice' (optionally 'XXX_Apples are nice').
+
+
+h2 Sorting content in menus
+
+Pagegen sorts the items in the menus by listing them alphabetically, to override this default sorting the files and directories can be prefixed by **XXX_** (3 digits and an underscore). The sort prefix will be striped from the title and URL
+
+The **XXX_** prefix for all file and directory names allows content to be sorted by changing the prefix. E.g. To sort 3 items, set the prefix to 001_, 002_ and 003_.
+
+notice A good practice is to use increments of 10 when setting the sort prefix (010_, 020_, 030_ etc.). This means an item can be added in the sequence with for instance 011_ without having to rename all items.
+
+
+h2 Hiding pages from menu listing
+
+If a directory or file is hidden (just prefix with a '.' (period), as you normally would on Linux/Unix, it will not be shown in the menus. 

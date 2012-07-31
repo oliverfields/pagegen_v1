@@ -1,0 +1,17 @@
+# Force text/html for all files without file extension
+<FilesMatch "\.*">
+  ForceType text/html
+</FilesMatch>
+
+# Use default type for files that have an extension
+<FilesMatch "\.[a-zA-Z0-9]{1,4}$">
+  ForceType none
+</FilesMatch>
+
+# Serve default as default file
+DirectoryIndex default
+
+ErrorDocument 400 /error_page_400
+ErrorDocument 403 /error_page_403
+ErrorDocument 404 /error_page_404
+ErrorDocument 500 /error_page_500

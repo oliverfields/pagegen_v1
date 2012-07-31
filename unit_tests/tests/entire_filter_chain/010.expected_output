@@ -1,0 +1,36 @@
+<p>Through configuration settings it is possible to setup generation of a <a href="http://sitemaps.org/">sitemap.xml</a> file. The <strong>sitemap.xml</strong> will be placed in the web root folder.</p>
+
+<h2>Site settings</h2>
+
+<p>The following settings must be configured to turn on sitemap generation, set these either globally in <strong>pagegen.conf</strong> or per site in <strong>site.conf</strong>.</p>
+
+<pre>
+ # This turns on sitemap generation
+ create_sitemap_xml=1
+
+ # This is required for the sitemap URLs to make sense
+ sitemap_page_base_url=http://mysite.com
+
+</pre>
+
+<h2>Page settings</h2>
+
+<p>In addition to the site settings each content page may specify certain variables to affect its listing in the sitemap.xml. These are set in the page header.</p>
+
+<table>
+<tr><th>Variable name</th><th>Values</th><th>Description</th></tr>
+<tr><td>omit_page_from_sitemap</td><td>1</td><td>If set the page will not be listed in the sitemap</td></tr>
+<tr><td>page_modified_date</td><td>YYYY-MM-DD</td><td>Specifies the date the content page was modified, default will use the actual date of the file, this variable is useful for overriding, for instance if the content file is a script it could set the date to the date the script ran, instead of the last time the script file was modified</td></tr>
+<tr><td>sitemap_page_change_freq</td><td>always, hourly, daily, weekly, monthly, yearly or never</td><td>How often the page is likely to change</td></tr>
+<tr><td>sitemap_page_priority</td><td>0.0 &#8211; 1.0</td><td>The priority of this page relative to other pages on the site. Default is 0.5</td></tr>
+
+</table>
+
+<h2>Example page header</h2>
+
+<pre>
+ page_modified_date=2009-05-11
+ sitemap_page_priority=0.2
+ =====
+ h2 This page is just for show
+</pre>

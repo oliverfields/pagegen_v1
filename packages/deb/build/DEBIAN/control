@@ -1,0 +1,18 @@
+Package: pagegen
+Version: 0.8.6 
+Section: web
+Priority: optional
+Architecture: all
+Installed-Size: 112
+Maintainer: Oliver Fields <oliver@phnd.net>
+Homepage: http://pagegen.phnd.net/
+Description: Static web site generator
+ .
+ Create web sites from flat text files and directories, the idea being that
+ every page is a file.
+ .
+ Pagegen is designed to allow focus on writing content and easily manipulating
+ it using the GNU/Linux command line. Pagegen uses Pextile for markup (a
+ variation of Textile). Sites are created by making folders and adding content
+ files, then generating the site.
+ .

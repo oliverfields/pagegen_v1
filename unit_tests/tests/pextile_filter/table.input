@@ -1,0 +1,4 @@
+% Heading cell 1 % Heading cell 2 % Heading cell 3 %
+%< Heading cell 4 (left aligned) %> Heading cell 5 (right aligned) %- Heading cell 6 (center aligned) %
+| Cell 1 | Cell 2 | Cell 3 |
+|< Cell 4 (left aligned) |> Cell 5 (right aligned) |- Cell 6 (center aligned) |

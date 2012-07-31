@@ -1,0 +1,10 @@
+<ul>
+<li>
+Run <tt>mksite my_site</tt> to setup the required directories and files for the site (the mksite script is in the <strong>[pagegen directory]/bin</strong>)
+<ul>
+<li>
+Add some text to the <strong>[pagegen directory]/mysite/content/default</strong>: <tt>echo "This is the front page:)" > default</tt>
+</li>
+</ul>
+</li>
+</ul>

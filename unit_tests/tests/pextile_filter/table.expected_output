@@ -1,0 +1,6 @@
+<table>
+<tr><th>Heading cell 1</th><th>Heading cell 2</th><th>Heading cell 3</th></tr>
+<tr><th class="pg_th_left">Heading cell 4 (left aligned)</th><th class="pg_th_right">Heading cell 5 (right aligned)</th><th class="pg_th_center">Heading cell 6 (center aligned)</th></tr>
+<tr><td>Cell 1</td><td>Cell 2</td><td>Cell 3</td></tr>
+<tr><td class="pg_td_left">Cell 4 (left aligned)</td><td class="pg_td_right">Cell 5 (right aligned)</td><td class="pg_td_center">Cell 6 (center aligned)</td></tr>
+</table>

@@ -1,0 +1,87 @@
+#!/bin/bash
+
+#------------------------------------------------------------
+# Pagegen - static HTML site generator
+# Copyright (C) 2009  Oliver Fields, oliver@phnd.net
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------
+
+# Manage pagegen sites
+
+config_file="/etc/pagegen.conf"
+
+function usage {
+  echo "Usage: $(basename $0) [ make <site_name> | list | create <site_name> ]" >&2
+  exit 1
+}
+
+function load_config_file(){
+  file=$1
+  if [ -r "$file" ]; then
+    eval $(grep -v '^#' "$file" | sed 's/^/export\ /')
+  else
+    echo "Unable to read $file" >&2
+  fi
+}
+export -f load_config_file
+
+load_config_file "$config_file"
+
+if [ $# = 0 ]; then
+  usage
+fi
+
+# Handle parameters
+while [ $# -gt 0 ]; do
+  case $1 in
+    make)
+      if [ "$2" = "" ] || [ $# -ne 2 ] ; then
+        usage
+      else
+        export SITE=$2
+
+        "$PAGEGEN_LIB_DIR/mksite" "$SITE"
+        shift 2
+      fi
+    ;;
+    list)
+       if [ $# -ne 1 ] ; then
+        usage
+      else
+        ls "$PAGEGENDIR"
+        shift 1
+      fi
+    ;;
+    create)
+      if [ "$2" = "" ] || [ $# -ne 2 ] ; then
+        usage
+      else
+        export SITE=$2
+        if [ $(ls "$PAGEGENDIR" | grep "^$SITE\$") ]; then
+          echo "Pagegen site $SITE already exists, aborting"
+        else 
+          "$PAGEGEN_LIB_DIR/mksite" "$SITE"
+        fi
+        shift 2
+      fi
+    ;;
+    *)
+      usage
+    ;;
+  esac
+done
+
+exit 0
+

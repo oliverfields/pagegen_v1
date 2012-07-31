@@ -1,0 +1,33 @@
+<p>Content is stored as regular files and is organized by putting the files in directories.</p>
+
+
+<h2>Content structure</h2>
+
+<p class="pg_warning">All directories must contain a file called <strong>default</strong></p>
+
+<p>All content is stored in the <strong>content directory</strong> (<tt>[Pagegen directory]/[site directory]/content</tt>).</p>
+
+<p>To and organize content pages add new text files and directories to the <strong>content</strong> directory. The name of the file/directory will be the page title, so use human readable names. All directories must contain a file called <strong>default</strong>.</p>
+
+<p class="pg_notice">Pagegen will generate nice URLs from the file and directory names. For instance the directory and file &#39;About us/Contact&#39; will get the URL &#39;about_us/contact&#39;.</p>
+
+<p class="pg_notice">The front page is <strong>content/default</strong></p>
+
+
+<h2>Page title and URL</h2>
+
+<p>When Pagegen generates pages the page title becomes the file or directory name (without the sort prefix <strong>XXX_</strong> if present, see below), this means the names used is important, if you want a title &#39;Apples are nice&#39; the file must be called &#39;Apples are nice&#39; (optionally &#39;XXX_Apples are nice&#39;).</p>
+
+
+<h2>Sorting content in menus</h2>
+
+<p>Pagegen sorts the items in the menus by listing them alphabetically, to override this default sorting the files and directories can be prefixed by <strong>XXX_</strong> (3 digits and an underscore). The sort prefix will be striped from the title and URL</p>
+
+<p>The <strong>XXX_</strong> prefix for all file and directory names allows content to be sorted by changing the prefix. E.g. To sort 3 items, set the prefix to 001_, 002_ and 003_.</p>
+
+<p class="pg_notice">A good practice is to use increments of 10 when setting the sort prefix (010_, 020_, 030_ etc.). This means an item can be added in the sequence with for instance 011_ without having to rename all items.</p>
+
+
+<h2>Hiding pages from menu listing</h2>
+
+<p>If a directory or file is hidden (just prefix with a &#39;.&#39; (period), as you normally would on Linux/Unix, it will not be shown in the menus.</p>

@@ -1,0 +1,12 @@
+<h2>HTML templates</h2>
+
+<p>There are two HTML template files, <strong>[site directory]/templates/header</strong> and <strong>[site directory]/templates/footer</strong>, upon generation of the site the header is added before the content, and the footer naturally after.</p>
+
+<p>If the header and footer are executable their output will be used instead of the actual file contents. Executable template files have any variables set in <strong>[site directory]/content_variables/&#42;</strong>, the <strong>page_title</strong> and/or any variables set in the content page header available for use (see <a href="/user_manual/dynamic_content">Dynamic content</a> for more information).</p>
+
+<p>In addition to the template files Pagegen adds a <strong>&#60;div&#62;</strong> tag around the page content. The tag&#39;s <strong>id</strong> attribute will be <strong>frontpage_content</strong> for the front page and for all other pages the <strong>id</strong> will be <strong>content</strong>.</p>
+
+
+<h2>CSS, Javascript and images</h2>
+
+<p>When generating the site all contents in the <strong>[site directory]/include</strong> directory are either copied(default) or symlinked to the output folder (see <a href="/user_manual/site_configuration">Site configuration</a>). Add CSS, Javascript and images (or anything else) to this directory to have them included with the generated site.</p>

@@ -1,0 +1,17 @@
+There are two configuration files that affect the way Pagegen generates files, they are:
+* **[Pagegen directory]/bin/pagegen.conf**
+* **[Site directory]/site.conf**
+
+The format is **Key=Value**, and **#** to comment. The files accept the same settings. To set options globally use **pagegen.conf** and for site specific use **site.conf**. If settings are set in both files the setting from the **site.conf** will be used. Currently the following settings are available.
+
+% Setting name % Setting values % Description %
+| add_accessibility_bookmarks  | 1 or 0 | If **1** then bookmarks are added to the main menu and content, to facilitate accessibility |
+| create_sitemap_xml | 1 or 0 | If **1** a sitemap.xml will be created and added to the web root folder. Must also set **sitemap_page_base_url** |
+| filter_svn_dirs | 1 or 0 | If **1** then .svn directories will not be included in output. Note that if used with the **symlink_site_include_dir** setting any .svn directories in the include directory will not be removed (that would mean loosing any revision control that was put on the include directory)  |
+| omit_crumb_trail | 1 or 0 | If **1** then the crumb trail is not included in output |
+| omit_home_from_main_menu | 1 or 0 | If **1** then the Home link is not included in the main menu |
+| omit_last_changed | 1 or 0 | If **1** then the last changed string is not included in output |
+| omit_sub_menu | 1  or 0  | If **1** the section menu is not included in output |
+| place_navigation_after_content | 1 or 0 | If **1** then the navigational elements are placed after the content in the HTML file, useful for creating accessible pages |
+| sitemap_page_base_url | Site URL | Used to generate proper links for the sitemap.xml |
+| symlink_site_include_dir | 1 or 0 | If **1** then instead of copying the **[site directory]/include** directory to the output folder, a symlink is made instead |

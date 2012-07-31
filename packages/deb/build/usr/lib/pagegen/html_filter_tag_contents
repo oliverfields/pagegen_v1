@@ -1,0 +1,93 @@
+#!/bin/bash
+
+#------------------------------------------------------------
+# Pagegen - static HTML site generator
+# Copyright (C) 2009  Oliver Fields, oliver@phnd.net
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------
+
+# To ensure valid HTML replaces <, >, " and ' that appear between tags
+# with the correct html entiti
+
+gt_entity="&#62;"
+lt_entity="&#60;"
+quote_entity="&#34;"
+apastroph_entity="&#39;"
+inpre=0
+IFS=""
+
+while read line; do
+  i=0
+
+  if [ "$line" = "<pre>" ]; then inpre=1; fi
+  if [ "$line" = "</pre>" ]; then inpre=0; fi
+ 
+  # If line is in pre tag, do not touch it 
+  if [ $inpre = 0 ]; then
+
+    # Check each charachter
+    while [ $i -lt ${#line} ]; do
+      char="${line:$i:1}"
+
+      # If < then check if this is a tag
+      if [ "$char" = "<" ]; then
+        n=$[$i+1]
+        startpos=$i
+
+        #echo "Tag start < found at position $i, searching for closing >"
+        while [ $n -lt ${#line} ]; do
+          
+          char2="${line:$n:1}"
+          #echo $char2 n: $n  i: $i
+          
+          if [ "$char2" = "<" ]; then
+            #echo "Not a tag, open < found at $n, change character $startpos"
+            # Replace first < at char start position  
+            #echo "${line:0:$startpos}&gt;${line:$[$startpos+1]}"
+            line="${line:0:$startpos}$lt_entity${line:$[$startpos+1]}"
+            i=$startpos
+            break
+          fi
+
+          if [ "$char2" = ">" ]; then
+            #echo "Closing > found at position $n"
+            i=$[$n+1]
+            break
+          fi
+          i=$[$i+1]
+          n=$[$n+1]
+        done
+      else
+        # Not in a tag, so replace greater than
+        if [ "$char" = ">" ]; then
+          line="${line:0:$i}$gt_entity${line:$[$i+1]}"
+        fi
+        # Not in a tag, so replace " 
+        if [ "$char" = '"' ]; then
+          line="${line:0:$i}$quote_entity${line:$[$i+1]}"
+        fi
+        # Not in a tag, so replace '
+        if [ "$char" = "'" ]; then
+          line="${line:0:$i}$apastroph_entity${line:$[$i+1]}"
+        fi
+        #echo $i $char
+        i=$[$i+1]
+      fi
+    done
+
+  fi # End if in pre tag
+
+  echo "$line"
+done

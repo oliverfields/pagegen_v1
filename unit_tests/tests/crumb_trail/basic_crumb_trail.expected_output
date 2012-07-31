@@ -1,0 +1,3 @@
+<div id="crumbtrail">
+<a href="/">Home</a> &gt; <a href="/test-file-name">Test file name</a> &gt; <a href="/test-file-name/test-file-name-2">Test file name 2</a> &gt; <a href="/test-file-name/test-file-name-2/test-file-name-3">Test file name 3</a>
+</div><!-- /path -->

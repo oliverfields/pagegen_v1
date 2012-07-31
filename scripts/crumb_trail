@@ -1,0 +1,64 @@
+#!/bin/bash
+
+#------------------------------------------------------------
+# Pagegen - static HTML site generator
+# Copyright (C) 2009  Oliver Fields, oliver@phnd.net
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------
+
+# Create a crumb trail (linka > linkb > linkc)
+#
+# Usage: crumb_trail [full path to pagegen bin dir] [full path to site dir] [selected item file system path relative to the content/ dir]
+
+# IFS is by default set to spaces, becuse files and dirs may contain
+# spaces set IFS to new line instead
+IFS=$'/'
+
+# IN: trail, string
+function print_crumb_trail {
+  trail="$1"
+  for item in $trail; do
+    # Chop off $item from $trail
+    lastitems=$(expr "$trail" : "\(.*\)$item")
+    
+    fspath=$lastitems$item
+     
+    for file in $fspath; do
+      path=$path/$(mkfilename $file)
+      linktext=$(mklinktext "$file")
+    done
+     
+    if [ -d "$SOURCEDIR/content/$fspath" ]; then
+      crumbtrail="$crumbtrail<a href=\"$path/\">$linktext</a> &gt; "
+    else
+      crumbtrail="$crumbtrail<a href=\"$path\">$linktext</a> &gt; "
+    fi
+
+    path=""
+  done
+
+  echo '<div id="crumbtrail">'
+  echo "<a href=\"/\">Home</a> &gt; $crumbtrail" | sed 's/\ \&gt;\ $//'
+  echo '</div><!-- /path -->'
+}
+
+if [ "$1" = "" ]; then
+  while read line; do
+    print_crumb_trail "$line"
+  done
+else
+  print_crumb_trail "$1"
+fi
+

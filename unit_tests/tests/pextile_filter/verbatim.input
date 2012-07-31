@@ -1,0 +1,8 @@
+/*
+Any text in here is not processed by the filter
+% This is not a table %
+
+And this is not **bold**
+*/
+
+**But this is bold**:)

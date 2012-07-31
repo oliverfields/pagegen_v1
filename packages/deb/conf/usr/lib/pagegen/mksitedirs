@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#------------------------------------------------------------
+# Pagegen - static HTML site generator
+# Copyright (C) 2009  Oliver Fields, oliver@phnd.net
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------
+
+# Creates new [site name]/site/[new site folder] and populates it with same
+# directory structure as in [site name]/content, only with web safe
+# directory names
+#
+# Usage: mksitedirs [full path to site directory] [name of new site directory]
+
+# IFS is by default set to spaces, becuse files and dirs may contain
+# spaces set IFS to new line instead
+IFS=$'\n'
+
+# Create site directory
+mkdir $TARGETDIR
+
+# Goto working directory
+cd $SOURCEDIR/content
+
+# Get all content directories and create them in target dir w web safe names
+for dir in $(find . -mindepth 1 -type d); do
+  mkdir -p $(../../bin/mkfilename $TARGETDIR/$dir | sed 's/\.\///')
+done

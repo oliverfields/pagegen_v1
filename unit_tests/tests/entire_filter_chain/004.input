@@ -1,0 +1,15 @@
+Run **[Pagegen directory]/bin/mksite [site name]** the generated HTML files will be in the **[Pagegen directory]/[site directory]/site/live**, simply copy this directory to your web root to go live:)
+
+
+h2 Pagegen file structure
+
+Each generated page has the following structure.
+
+% Name % Source % Description %
+| Header | [site directory]/templates/header | Start of HTML document |
+| Main menu | Generated HTML | List of links to pages found in all immediate child directories from the **content** directory (one directory below) |
+| Sub menu | Generated HTML | For each child directory of **content** show links from the current page to the top child directory |
+| Crumb trail | Generated HTML | Crumb trail for each page |
+| Last changed date | Generated HTML | Show modification time of content files |
+| Content files | [site directory]/content/* | The actual site content |
+| Footer | [site directory]/templates/footer | End of HTML document |

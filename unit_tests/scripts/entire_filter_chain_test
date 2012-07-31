@@ -1,0 +1,6 @@
+#!/bin/bash
+# Setup environment for testing filter chain 
+
+"$PAGEGEN_LIB_DIR/cut_header-filter" | "$PAGEGEN_LIB_DIR/content_variable-filter" | "$PAGEGEN_LIB_DIR/numbering-filter" | "$PAGEGEN_LIB_DIR/html_entity-filter" | "$PAGEGEN_LIB_DIR/pextile-filter" | "$PAGEGEN_LIB_DIR/html_filter_tag_contents"
+
+exit 0

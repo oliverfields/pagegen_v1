@@ -1,0 +1,69 @@
+#!/bin/bash
+# Run pagegen unit tests
+
+# Load configs
+source $(dirname "$0")/unit_test.conf
+
+test_error=0
+
+########################################
+# pextile-filter
+########################################
+"$scripts_dir/test_filter" -f "$PAGEGEN_LIB_DIR/pextile-filter" -t "$tests_dir/pextile_filter" || test_error=1
+
+########################################
+# numbering-filter
+########################################
+"$scripts_dir/test_filter" -f "$PAGEGEN_LIB_DIR/numbering-filter" -t "$tests_dir/numbering_filter" || test_error=1
+
+########################################
+# content_variable-filter
+########################################
+"$scripts_dir/content_variable_filter_test" || test_error=1
+
+########################################
+# crumb_trail
+########################################
+"$scripts_dir/test_filter" -f "$PAGEGEN_LIB_DIR/crumb_trail" -t "$tests_dir/crumb_trail" || test_error=1
+
+########################################
+# mkfilename 
+########################################
+"$scripts_dir/test_filter" -f "$PAGEGEN_LIB_DIR/mkfilename" -t "$tests_dir/mkfilename" || test_error=1
+
+########################################
+# mklinktext 
+########################################
+"$scripts_dir/test_filter" -f "$PAGEGEN_LIB_DIR/mklinktext" -t "$tests_dir/mklinktext" || test_error=1
+
+########################################
+# html_filter_tag_contents 
+########################################
+"$scripts_dir/test_filter" -f "$PAGEGEN_LIB_DIR/html_filter_tag_contents" -t "$tests_dir/html_filter_tag_contents" || test_error=1
+
+########################################
+# cut_header-filter
+########################################
+"$scripts_dir/test_filter" -f "$PAGEGEN_LIB_DIR/cut_header-filter" -t "$tests_dir/cut_header_filter" || test_error=1
+
+########################################
+# html_entity-filter
+########################################
+"$scripts_dir/test_filter" -f "$PAGEGEN_LIB_DIR/html_entity-filter" -t "$tests_dir/html_entity_filter" || test_error=1
+
+########################################
+# entire_pagegen_filter_chain 
+########################################
+"$scripts_dir/test_filter" -f "$scripts_dir/entire_filter_chain_test" -t "$tests_dir/entire_filter_chain" || test_error=1
+
+########################################
+# main_menu 
+########################################
+"$scripts_dir/main_menu_test"
+
+########################################
+# sub_menu 
+########################################
+"$scripts_dir/test_filter" -f "$PAGEGEN_LIB_DIR/sub_menu" -s "$tests_dir/sub_menu/basic_submenu.expected_output" -p "000_Dir 1" \; -i || test_error=1
+
+exit $test_error

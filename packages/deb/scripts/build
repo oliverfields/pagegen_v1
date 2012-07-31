@@ -1,0 +1,100 @@
+#!/bin/bash
+# Setup deb packaging environment
+
+set -e
+
+version=$1
+
+if [ "$version" = "" ]; then
+  echo "Usage: $(basename "$0") <version_number>"
+  exit 1
+fi
+
+# Assumes complete svn checkout of head branch to work 
+script_dir=$(cd $(dirname $0) && pwd)
+cd "$script_dir"
+cd .. 
+
+# We are now in pagegen/packages/deb
+
+if [ -e "build" ]; then
+  # Tidy up any old stuff
+  rm -Rf build/*
+else
+  mkdir build
+fi
+
+# Copy pagegen scripts dir and rename it
+mkdir -p "build/usr/lib"
+cp -R "../../scripts" "build/usr/lib/pagegen"
+
+# Move pagegen to bin, want to keep as much as poss out of /usr/bin
+mkdir "build/usr/bin"
+mv "build/usr/lib/pagegen/pagegen" "build/usr/bin/pagegen"
+
+# Copy conf files / setup deb dir structure
+cp -R "conf/usr/share" "build/usr/share"
+cp -R "conf/etc" "build/etc"
+mkdir "build/DEBIAN"
+
+# Copy conffiles
+cp "conf/DEBIAN/conffiles" "build/DEBIAN/."
+
+# Remove .svn
+rm -Rf $(find build -type d -name .svn)
+
+# Setup changelog files
+# Add new changelog entries to changelog and changelog.Debian
+
+changelog="conf/usr/share/doc/pagegen/changelog"
+{
+echo "$(date +%Y-%m-%d)  Oliver Fields  <oliver@phnd.net>"
+echo ""
+echo " * Write something!"
+echo ""
+} > "${changelog}_tmp"
+cat "$changelog" >> "${changelog}_tmp"
+mv "${changelog}_tmp" "$changelog"
+vi "$changelog"
+cp "$changelog" "build/usr/share/doc/pagegen/changelog"
+
+deb_changelog="conf/usr/share/doc/pagegen/changelog.Debian"
+{
+echo "pagegen ($version) stable; urgency=low"
+echo ""
+echo "  * Write something!"
+echo ""
+echo " -- Oliver Fields <oliver@phnd.net>  $(date --rfc-2822)"
+echo ""
+} > "${deb_changelog}_tmp"
+cat "$deb_changelog" >> "${deb_changelog}_tmp"
+mv "${deb_changelog}_tmp" "$deb_changelog"
+vi "$deb_changelog"
+cp "$deb_changelog" "build/usr/share/doc/pagegen/changelog.Debian"
+
+# Compress misc files 
+gzip --best "build/usr/share/man/man1/pagegen.1"
+gzip --best "build/usr/share/doc/pagegen/changelog.Debian"
+gzip --best "build/usr/share/doc/pagegen/changelog"
+
+# md5sums
+find build -type f -exec md5sum {} \; | grep -v DEBIAN | sed 's#\ \ build/#\ \ #' >> build/DEBIAN/md5sums
+
+# Create control file, must be last step because need to work out
+# size of package
+disk_usage=$(expr $(du -bs build | sed 's/^\([0-9]*\).*/\1/') / 1024)
+sed "s/PAGEGEN_VERSION_PAGEGEN/$version/;s/PAGEGEN_DISK_USAGE_PAGEGEN/$disk_usage/" < "conf/DEBIAN/control" > build/DEBIAN/control 
+
+# Set permissions
+find build -type d -exec chmod 755 {} \;
+find build -type f -exec chmod 644 {} \;
+find build/usr/lib/pagegen -type f -exec chmod 755 {} \;
+chmod 755 build/usr/bin/pagegen
+chmod 0644 build/DEBIAN/md5sums
+
+
+# Build build dir and put deb in built dir
+fakeroot dpkg --build build built
+
+# Check package
+lintian "built/pagegen_${version}_all.deb"

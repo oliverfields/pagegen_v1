@@ -1,0 +1,13 @@
+2010-11-19  Oliver Fields  <oliver@phnd.net>
+
+ * Handle .htaccess file
+
+2009-10-18  Oliver Fields  <oliver@phnd.net>
+
+ * Pextile update: "Link text":"name:anchor_name" > <a name="anchor_name">Link text</a>  
+
+2009-10-14  Oliver Fields  <oliver@phnd.net>
+
+ * Able to center align images using pextile
+ * Links generate hidden span containing the url for use with print, in addition to the usual a tag
+ * Last changed date moved to after content to keep search engine listings nicer 

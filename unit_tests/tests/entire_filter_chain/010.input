@@ -1,0 +1,30 @@
+Through configuration settings it is possible to setup generation of a "sitemap.xml":"http://sitemaps.org/" file. The **sitemap.xml** will be placed in the web root folder.
+
+h2 Site settings
+
+The following settings must be configured to turn on sitemap generation, set these either globally in **pagegen.conf** or per site in **site.conf**.
+
+> # This turns on sitemap generation
+> create_sitemap_xml=1
+>
+> # This is required for the sitemap URLs to make sense
+> sitemap_page_base_url=http://mysite.com
+ 
+
+h2 Page settings
+
+In addition to the site settings each content page may specify certain variables to affect its listing in the sitemap.xml. These are set in the page header.
+
+% Variable name % Values % Description %
+| omit_page_from_sitemap | 1 | If set the page will not be listed in the sitemap |
+| page_modified_date | YYYY-MM-DD | Specifies the date the content page was modified, default will use the actual date of the file, this variable is useful for overriding, for instance if the content file is a script it could set the date to the date the script ran, instead of the last time the script file was modified |
+| sitemap_page_change_freq | always, hourly, daily, weekly, monthly, yearly or never | How often the page is likely to change |
+| sitemap_page_priority | 0.0 - 1.0 | The priority of this page relative to other pages on the site. Default is 0.5 |
+
+
+h2 Example page header
+
+> page_modified_date=2009-05-11
+> sitemap_page_priority=0.2
+> =====
+> h2 This page is just for show

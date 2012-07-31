@@ -1,0 +1,15 @@
+<h1>This is valid html, do <strong>nothing</strong></h1>
+<p>This '>' however is invalid xhtml, the greater than should be replaced</p>
+<p>So should these: >, <, " and '</p>
+<p> This however, will be treated as a <tag></p>
+<p>look >>><<< < >></p>
+<pre>
+But if in a pre tag, don't boter <3
+(requires pre opening and closing tags to be on seperate lines
+</pre>
+<pre>
+The pre tag can also span
+multiple
+lines
+look >>><<< < >>
+</pre>

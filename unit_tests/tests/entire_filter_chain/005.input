@@ -1,0 +1,104 @@
+When the site is generated each page will contain a main menu, sub menu and crumb trail (unless the sub menu and/or crumb trail are disabled in the **site.conf**).
+
+The generated menus can be tweaked using CSS and/or Javascript and allow for some of standard navigational layouts. All examples below refer to the following directory structure.
+
+warning A directory must always contain a file called default.
+
+notice All items, except the default files, can be prefixed with 3 digits and an underscore, e.g. **010_** to specify order in menus. All menu items are sorted alphabetically, so the 3 digit prefix and underscore allows items to be sorted as the user wants.
+
+
+h2 Example site(directory) structure
+
+% Level 1 % Level 2 % Level 3 % Level 4 %
+| Directory 1 | | | |
+| | default | | |
+| Directory 2 | | | |
+| | default | | |
+| | File 2.1 | | |
+| | File 2.2 | | |
+| Directory 3 | | | |
+| | default | | |
+| | Directory 3.1 | | |
+| | | default | |
+| | | File 3.1.1 | |
+| | | Directory 3.1.2 | |
+| | | | default |
+| | | | File 3.1.2.1 |
+| | | Directory 3.1.3 |
+| | | | default |
+| | | | File 3.1.3.1 |
+
+
+h2 Main menu
+
+The main menu consists of all directories found in level 1 and all items found in level 2. For each page the appropriate section and menu item is indicated by a class attribute.
+
+The main menu that would be generated page **File 2.1** in the example above would be as follows.
+
+> %a%  &#60;div id="mainmenu"&#62;
+> %a%    &#60;ul&#62;
+> %a%      &#60;li class="section"&#62;&#60;a href="/directory_1/"&#62;Directory 1&#60;/a&#62;&#60;/li&#62;
+> %a%      &#60;li class="section_selected"&#62;&#60;a href="/directory_2/"&#62;Directory 2&#60;/a&#62;
+> %a%        &#60;ul&#62;
+> %a%          &#60;li&#62;&#60;a class="item_selected" href="/directory_2/file_2.1"&#62;File 2.1&#60;/a&#62;&#60;/li&#62;
+> %a%          &#60;li&#62;&#60;a href="/directory_2/file_2.2"&#62;File 2.2&#60;/a&#62;&#60;/li&#62;
+> %a%        &#60;/ul&#62;
+> %a%      &#60;/li&#62;
+> %a%     &#60;li class="section"&#62;&#60;a href="/directory_3/"&#62;Directory 3&#60;/a&#62;
+> %a%       &#60;ul&#62;
+> %a%         &#60;li&#62;&#60;a href="/directory_3/directory_3.1/"&#62;Directory 3.1&#60;/a&#62;&#60;/li&#62;
+> %a%       &#60;/ul&#62;
+> %a%     &#60;/li&#62;
+> %a%   &#60;/ul&#62;
+> %a% &#60;/div&#62;
+
+Notice the href attribute for the **Directory links**, they assume that the default index file on the web server is called **default**. See "Web server setup":"/user_manual/web_server_setup" for more information.
+
+Please note that class attribute of the &#60;li&#62; tag on line 4 is **section_selected** whilst for the other items at this level it is **section**. Similarly on line 6 the class attribute is **item_selected**. The **section_selected** class will always be set on the appropriate tag, whilst the **item_selected** will only be set if the page is in either level 1 or 2 (see example above).
+
+
+h2 Sub menu
+
+The sub menu lists items from level 1, but only listing the contents of the directories required to display the current item.
+
+The sub menu that would be generated for page **File 3.1.2.1** in the example above would be as follows.
+
+> %c%  &#60;ul id="submenu"&#62;
+> %c%    &#60;li&#62;
+> %c%      &#60;a href="/directory_3/"&#62;Directory 3&#60;/a&#62;
+> %c%      &#60;ul&#62;
+> %c%        &#60;li&#62;
+> %c%          &#60;a href="/directory_3/directory_3.1/"&#62;Directory 3.1&#60;/a&#62;
+> %c%          &#60;ul&#62;
+> %c%            &#60;li&#62;
+> %c%              &#60;a href="/directory_3/directory_3.1/file_3.1.1"&#62;File 3.1.1&#60;/a&#62;
+> %c%           &#60;/li&#62;
+> %c%           &#60;li&#62;
+> %c%             &#60;a href="/directory_3/directory_3.1/directory_3.1.2/"&#62;Directory 3.1.2&#60;/a&#62;
+> %c%             &#60;ul&#62;
+> %c%               &#60;li&#62;
+> %c%                 &#60;a class="item_selected" href="/directory_3/directory_3.1/directory_3.1.2/file_3.1.2.1"&#62;File 3.1.2.1&#60;/a&#62;
+> %c%               &#60;/li&#62;
+> %c%             &#60;/ul&#62;
+> %c%           &#60;/li&#62;
+> %c%           &#60;li&#62;
+> %c%             &#60;a href="/directory_3/directory_3.1/directory_3.1.3/"&#62;Directory 3.1.3&#60;/a&#62;
+> %c%           &#60;/li&#62;
+> %c%         &#60;/ul&#62;
+> %c%       &#60;/li&#62;
+> %c%     &#60;/ul&#62;
+> %c%   &#60;/li&#62;
+> %c% &#60;/ul&#62;
+
+Please note that on line 15 the &#60;a&#62; tag class attribute is **item_selected** and that Directory 3.1.3 has not been expanded.
+
+
+h2 Crumb trail
+
+The crumb trail lists the "directory path" to the current item. The crumb trail to **File 2.2** would be as follows.
+
+> %d% &#60;div id="crumbtrail"&#62;
+> %d%   &#60;a href="/"&#62;Home&#60;/a&#62; &#62;
+> %d%   &#60;a href="/directory_2/"&#62;Directory 2&#60;/a&#62; &#62;
+> %d%   &#60;a href="/directory_2/file_2.2"&#62;File 2.2&#60;/a&#62;
+> %d% &#60;/div&#62;

@@ -1,0 +1,67 @@
+<p>Though the final site will be static HTML, the content may be dynamically created when it is generated.</p>
+
+
+<h2>Executable content pages</h2>
+
+<p>When generating content Pagegen will first check if the content file is executable, if it is the file will be run and the output used, if not the file will be parsed as pextile markup. I.e. the content file could be a shell script that produces HTML.</p>
+
+
+<h2>Incremental variables</h2>
+
+<p>For non-executable content files it is possible to add incremental variables. An incremental variable will increment by 1 each time it is used. To use enter <strong>%[single letter]%</strong> anywhere in the content file.</p>
+
+<p>The following content file..</p>
+
+<pre>
+ Hello I'm an incremental variable &#37;a&#37;, and I'm &#37;b&#37;
+ I started as 1, but now I've become &#37;a&#37;
+
+</pre>
+<p>..will become:</p>
+
+<pre>
+ Hello I'm an incremental variable 1, and I'm 1
+ I started as 1, but now I've become 2
+
+</pre>
+
+<h2>Content variables</h2>
+
+<p>On site generation all files in <strong>[site directory]/content_variables</strong> will be parsed and the variables made available for use in all content pages that are not executable. The format is <strong>key=value</strong>.</p>
+
+<p>For instance if the file <strong>[site directory]/content_variables/company_names</strong> includes a line consisting of <strong>my_company=My Very Own Inc.</strong> then all occurrences of <strong>&#36;my_company</strong> in the content files will be replaced by <strong>My Very Own Inc.</strong>.</p>
+
+
+<h2>Page variables</h2>
+
+<p>Content pages that are not scripts/executables may contain an optional header part in order to set certain attributes. The header section consists of key/values followed by a line containing only <strong>=====</strong> (five equals signs).</p>
+
+<p>The key/values can be used by the header, footer or in the content page itself by specifying <strong>&#36;[key name]</strong>.</p>
+
+<pre>
+ var1=Hello
+ var2=World
+ =====
+ &#36;{var1} &#36;{var2}!!
+
+</pre>
+<p>When the page is generated it will become:</p>
+
+<pre>
+ Hello World!!
+
+</pre>
+<p>The variables defined in the page header are available as environment variables to the header and footer templates. For the template to make use of the variable it must be executable and setup to do something with the variable.</p>
+
+
+<h2>Page title</h2>
+
+<p>Default is to set the page title to the same as the file/directory name, this may be overridden by specifying a value for <strong>page_title</strong> in the page header section, e.g.:</p>
+
+<pre>
+ page_title=Override the default title with this one:)
+ =====
+ h2 Normal content
+
+</pre>
+<p>The <strong>&#36;page_title</strong> variable is also available as an environment variable for executable header and footer templates. If the template is executable it could be used to e.g. set the page title tag to the <strong>&#36;page_title</strong> variable.</p>

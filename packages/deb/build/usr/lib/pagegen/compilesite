@@ -1,0 +1,476 @@
+#!/bin/bash
+#------------------------------------------------------------
+# Pagegen - static HTML site generator
+# Copyright (C) 2009  Oliver Fields, oliver@phnd.net
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------
+
+# Compile main menu, sub menu, header/footer and page content from source to finished site html files and rename all directories and files to web safe names
+# Usage: compilesite [full path to pagegen bin dir] [site dir] [site target publish directory]
+
+# IFS is by default set to spaces, becuse files and dirs may contain
+# spaces set IFS to new line instead
+IFS=$'\n'
+
+function get_file_changed_date {
+  # If page_mod_datetime is set just return it, else work it out
+  if [ "$page_modified_datetime" = "" ]; then
+    # The current working dir is in the newly created
+    # site/xxxxx folder, use the following to work out
+    # the path to the original content file, as it is
+    # the changed date on that one that is of interest
+
+    workingdir=$(pwd)
+    cutFromChar=$(expr ${#TARGETDIR} + 2)
+    tmpFilePath=$(echo "$workingdir/$file" | cut -c ${cutFromChar}-)
+    sourceFilePath=$(echo "$SOURCEDIR/content/$tmpFilePath")
+
+    if [ -d "$sourceFilePath" ]; then
+      sourceFilePath="$sourceFilePath/default"
+    fi
+    stat "$sourceFilePath" | tail -1 | cut -c 9-24
+  else
+    echo "$page_modified_datetime"
+  fi
+}
+
+function lastChangedDate {
+  # Include last changed timestamp
+  echo "<div id=\"last_changed\">Last changed " >> filetmp
+  get_file_changed_date >> filetmp
+  echo "</div><!-- /last_changed -->" >> filetmp
+}
+
+function sitemap_entry {
+  sitemap_location="$1"
+  # If omit_page_from_sitemap variable not set add page to sitemap
+  # It only makes sense to set this variable in a content page header 
+  if ! [ "$omit_page_from_sitemap" = "1" ]; then
+    # If sitemap file empty add header
+    if ! [ -e "$TARGETDIR/sitemap.xml" ]; then
+      echo '<?xml version="1.0" encoding="UTF-8"?>' > "$TARGETDIR/sitemap.xml"
+      echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> "$TARGETDIR/sitemap.xml"
+    fi
+
+    echo "<url>" >> "$TARGETDIR/sitemap.xml"
+    echo "<loc>$sitemap_location</loc>" >> "$TARGETDIR/sitemap.xml"
+    
+    if [ "$page_modified_datetime" = "" ]; then
+      echo "<lastmod>$(get_file_changed_date | cut -c 1-10)</lastmod>" >> "$TARGETDIR/sitemap.xml"
+    else
+      echo "<lastmod>$page_modified_datetime</lastmod>" >> "$TARGETDIR/sitemap.xml"
+    fi
+      
+    if ! [ "$sitemap_page_priority" = "" ]; then
+      echo "<priority>$sitemap_page_priority</priority>" >> "$TARGETDIR/sitemap.xml"
+    fi  
+
+    if ! [ "$sitemap_page_change_freq" = "" ]; then
+      echo "<changefreq>$sitemap_page_change_freq</changefreq>" >> "$TARGETDIR/sitemap.xml"
+    fi  
+
+    echo "</url>" >> "$TARGETDIR/sitemap.xml"
+  fi
+}
+
+# Add navigational elements
+# IN: mainmenu
+# IN: filepath
+# IN: crumbtrail
+function add_navigation {
+  mainmenu=$1
+  filepath=$2
+  file_name=$3
+  crumbtrail=$4
+
+
+  # Include main menu
+  main_menu "$mainmenu" "$file_name" >> filetmp
+  # Include sub_menu
+  if ! [ "$omit_sub_menu" = "1" ]; then
+    sub_menu "${filepath}$file_name" >> filetmp
+  fi
+  # Include crumb_trail
+  if ! [ "$omit_crumb_trail" = "1" ]; then
+    crumb_trail "$crumbtrail" >> filetmp
+  fi
+}
+
+# Create file from components
+function createfile {
+  file=$1
+  isdir=$2  
+
+if [ "$file" = "stop" ]; then
+  continue
+fi
+
+  # Strip TARGETDIR from pwd, need to do this so filepath is relative (for use in html links)
+  filepath=$(expr "$(pwd)" : "$TARGETDIR\/\(.*\)")
+  # If filepath not empty add trailing slash
+  # and set main menu variable (used to determine which main
+  # menu has been selected)
+  if ! [ "$filepath" = "" ]; then
+    filepath=$(echo "$filepath/")
+    mainmenu=$(echo "$filepath" | cut -d'/' -f1)
+  else
+    mainmenu=$file
+  fi
+  
+  # Create crumbtrail
+  if ! [ "$omit_crumb_trail" = "1" ]; then
+    crumbtrail=$(expr "$(pwd)" : "$TARGETDIR\/\(.*\)" )
+    if [ "$crumbtrail" = "" ]; then
+      crumbtrail=$file
+    else
+      crumbtrail=$(echo "$crumbtrail/$file")
+    fi
+  fi
+
+  # Load any header variables from the file
+
+  # The current working dir is in the newly created
+  # site/xxxxx folder, use the following to work out
+  # the path to the original content file for using grep
+  cutFromChar=$(expr ${#TARGETDIR} + 2)
+  tmpFilePath=$(echo "$(pwd)/$file" | cut -c ${cutFromChar}-)
+  sourceFilePath=$(echo "$SOURCEDIR/content/$tmpFilePath")
+
+  if [ -d "$sourceFilePath" ]; then
+    sourceFilePath="$sourceFilePath/default"
+  fi
+
+  # Need to unset all vars that the page sets
+  unset unset_vars
+
+  # Check file has header info, ie that there exists
+  # a header seperator '====='
+  grep -q -e '^=====$' "$sourceFilePath"
+  if [ "$?" = "0" ]; then
+    while read line; do
+      if [[ "$line" =~ '=====' ]]; then
+        break
+      else
+        key=$(echo "$line" | cut -d'=' -f1)
+        value=$(echo "$line" | cut -d'=' -f2)
+        export "${key}"="${value}"
+        unset_vars=$(echo "unset $key;$unset_vars")
+      fi
+    done < "$sourceFilePath"
+  fi
+
+  # Set this as default environment header
+  if [ "$page_title" = "" ]; then
+    export page_title=$(mklinktext "$file" | sed 's#/default$##;s#^default$##')
+  fi
+
+  # If the file is executable, run it and include output,
+  # else just include it's contents
+  if [ -x $SOURCEDIR/templates/header ]; then
+    $SOURCEDIR/templates/header > filetmp
+  else
+    cat $SOURCEDIR/templates/header > filetmp
+  fi
+  
+  if ! [ "$place_navigation_after_content" = "1" ]; then
+    add_navigation "$mainmenu" "$filepath" "$file" "$crumbtrail"
+  fi
+ 
+  # Content div
+  echo '<div id="content">' >> filetmp
+  
+  if [ "$add_accessibility_bookmarks" = "1" ]; then
+    echo '<a name="content_bookmark" id="content_bookmark">Content</a>' >> filetmp
+  fi
+
+  echo "<h1>$(mklinktext "$page_title")</h1>" >> filetmp
+  
+  # If directory then have to check the default file
+  # If the file is executable, run it and include output,
+  # else just include it's contents
+  if [ "$isdir" = "isdir" ]; then
+    # Update sitemap.xml
+    if [ "$create_sitemap_xml" = "1" ]; then
+      if [ "$site_base_url" = "" ]; then
+        echo "Error: site_base_url setting not set" 2>&1
+        exit 1
+      else
+        sitemap_entry "$(mkfilename "$site_base_url/$filepath$file/default")"
+      fi
+    fi
+
+    # If file is executable run it, else filter it
+    if [ -x "$file/default" ]; then
+      "./$file/default" >> filetmp
+    else
+      cut_header-filter < "$file/default" | content_variable-filter | numbering-filter | html_entity-filter | pextile-filter | html_filter_tag_contents >> filetmp
+    fi
+    
+    # Add modified date
+    if ! [ "$omit_last_changed" = "1" ]; then
+      lastChangedDate >> filetmp
+    fi
+
+    echo '</div><!-- /content -->' >> filetmp
+
+    if [ "$place_navigation_after_content" = "1" ]; then
+      add_navigation "$mainmenu" "$filepath" "$file/default" "$crumbtrail"
+    fi
+    
+    # Include footer
+    # If the file is executable, run it and include output,
+    # else just include it's contents
+    if [ -x $SOURCEDIR/templates/footer ]; then
+      $SOURCEDIR/templates/footer >> filetmp
+    else
+      cat $SOURCEDIR/templates/footer >> filetmp
+    fi
+    # Overwrite with the newly created file
+    mv filetmp "$file/default"
+
+  else # Else if the file is not a directory
+    # Update sitemap.xml
+    if [ "$create_sitemap_xml" = "1" ]; then
+      if [ "$site_base_url" = "" ]; then
+        echo "Error: site_base_url setting not set" 2>&1
+        exit 1
+      else
+        sitemap_entry "$(mkfilename "$site_base_url/$filepath$file")"
+      fi
+    fi
+
+    # If the file is executable, run it and include output,
+    # else just include it's contents
+    if [ -x "$file" ]; then
+      "./$file" >> filetmp
+    else
+      cut_header-filter < "$file" | content_variable-filter | numbering-filter | html_entity-filter | pextile-filter | html_filter_tag_contents >> filetmp
+    fi
+    
+    # Set file modified date
+    if ! [ "$omit_last_changed" = "1" ]; then
+      lastChangedDate >> filetmp
+    fi
+ 
+    echo '</div><!-- /content -->' >> filetmp
+    if [ "$place_navigation_after_content" = "1" ]; then
+      add_navigation "$mainmenu" "$filepath" "$file" "$crumbtrail"
+    fi
+  
+    # Include footer
+    # If the file is executable, run it and include output,
+    # else just include it's contents
+    if [ -x $SOURCEDIR/templates/footer ]; then
+      $SOURCEDIR/templates/footer >> filetmp
+    else
+      cat $SOURCEDIR/templates/footer >> filetmp
+    fi
+    # Overwrite with the newly created file
+    mv filetmp "$file"
+  fi
+    
+  # Unset page_title
+  unset page_title
+
+  # Unset page vars
+  eval "$unset_vars"
+}
+
+# Recursivley descend into content dir and compile the finished html files
+function compilehtml {
+  compile_html_dir="$1"
+  compile_html_file=""
+  if [ -d "$compile_html_dir" ]; then
+    cd "$compile_html_dir"
+    for compile_html_file in $(ls -A1); do
+      if [ -f "$compile_html_file" ]; then
+        if ! [ "$compile_html_file" = "default" ]; then
+          createfile "$compile_html_file"
+        fi
+      elif [ -d "$compile_html_file" ]; then
+        createfile "$compile_html_file" "isdir"
+        compilehtml "$compile_html_file"
+      fi
+    done
+    cd ..
+  fi
+}
+
+# Recursivly rename each file and directory to web safe names
+function makewebsafenames {
+  dir=$1
+  cd $dir
+  for item in $(ls -A1); do
+    if [ -d "$item" ]; then
+      mv "$item" $(mkfilename "$item")
+      makewebsafenames $(mkfilename "$item")
+    elif [ -f "$item" ]; then 
+      if ! [ "$item" = "default" ]; then
+        if ! [ "$item" = "sitemap.xml" ]; then
+          mv "$item" $(mkfilename "$item")
+        fi
+      fi
+    fi
+  done
+  cd ..
+}
+
+# Create webserver error pages 
+function create_error_pages {
+  #For each error_* page generate and place on root of output dir  
+
+  for error_page in $(ls -1 $SOURCEDIR/templates/error_page_*); do
+    error_page=$(basename "$error_page");
+    # If file is executable run it, else just include it
+    if [ -x $SOURCEDIR/templates/header ]; then
+      $SOURCEDIR/templates/header > filetmp
+    else
+      cat $SOURCEDIR/templates/header > filetmp
+    fi 
+        
+    if ! [ "$place_navigation_after_content" = "1" ]; then
+      main_menu >> filetmp
+    fi   
+
+    echo '<div id="content">' >> filetmp
+      
+    if [ "$add_accessibility_bookmarks" = "1" ]; then
+      # Add anchor bookmark tag, usefull for accessibility
+      echo '<a name="content_bookmark" id="content_bookmark">Content</a>' >> filetmp
+    fi
+
+    if [ -x "$SOURCEDIR/templates/$error_page" ]; then
+      cut_header-filter < "./$SOURCEDIR/templates/$error_page" | numbering-filter | html_entity-filter | pextile-filter | html_filter_tag_contents >> filetmp
+    else
+      cut_header-filter < "$SOURCEDIR/templates/$error_page" | content_variable-filter | numbering-filter | html_entity-filter | pextile-filter | html_filter_tag_contents >> filetmp
+    fi
+        
+    echo '</div><!-- /content -->' >> filetmp
+
+    if [ "$place_navigation_after_content" = "1" ]; then
+      main_menu >> filetmp
+    fi   
+
+    # If file is executable run it, else just include it
+    if [ -x $SOURCEDIR/templates/footer ]; then
+      $SOURCEDIR/templates/footer >> filetmp
+    else
+      cat $SOURCEDIR/templates/footer >> filetmp
+    fi
+    mv filetmp "$TARGETDIR/$error_page"
+  done
+}
+
+# Add header, main menu, content and footer to html page
+cd $TARGETDIR
+for item in $(ls -A1); do
+  if [ -d "$item" ]; then
+    compilehtml "$item"
+    createfile "$item" "isdir"
+  else
+    # This will be the frontpage
+
+    # Load any header variables from the file
+
+    sourceFilePath=$(echo "$SOURCEDIR/content/default")
+
+    # Need to unset all vars that the page sets
+    unset unset_vars
+
+    # Check file has header info, ie that there exists
+    # a header seperator '====='
+    grep -q -e '^=====$' "$sourceFilePath"
+    if [ "$?" = "0" ]; then
+      while read line; do
+        if [[ "$line" =~ '=====' ]]; then
+          break
+        else
+          key=$(echo "$line" | cut -d'=' -f1)
+          value=$(echo "$line" | cut -d'=' -f2)
+          export "${key}"="${value}"
+          unset_vars=$(echo "unset $key;$unset_vars")
+        fi
+      done < "$sourceFilePath"
+    fi
+
+    # Update sitemap.xml
+    if [ "$create_sitemap_xml" = "1" ]; then
+      if [ "$site_base_url" = "" ]; then
+        echo "Error: site_base_url setting not set" 2>&1
+        exit 1
+      else
+        sitemap_entry "$(mkfilename "$site_base_url/${filepath}default")"
+      fi
+    fi
+
+    # If file is executable run it, else filter it
+    if [ -x $SOURCEDIR/templates/header ]; then
+      $SOURCEDIR/templates/header > filetmp
+    else
+      cat $SOURCEDIR/templates/header > filetmp
+    fi
+    
+    if ! [ "$place_navigation_after_content" = "1" ]; then
+      main_menu >> filetmp
+    fi   
+  
+    echo '<div id="frontpage_content">' >> filetmp
+  
+    if [ "$add_accessibility_bookmarks" = "1" ]; then
+      # Add anchor bookmark tag, usefull for accessibility
+      echo '<a name="content_bookmark" id="content_bookmark">Content</a>' >> filetmp
+    fi
+
+    # If file is executable run it, else filter it
+    if [ -x "$item" ]; then
+      "./$item"
+    else
+      cut_header-filter < "$item" | content_variable-filter | numbering-filter | html_entity-filter | pextile-filter | html_filter_tag_contents >> filetmp
+    fi
+    
+    echo '</div><!-- /frontpage_content -->' >> filetmp
+    
+    if [ "$place_navigation_after_content" = "1" ]; then
+      main_menu >> filetmp
+    fi   
+
+    if [ -x $SOURCEDIR/templates/footer ]; then
+      $SOURCEDIR/templates/footer >> filetmp
+    else
+      cat $SOURCEDIR/templates/footer >> filetmp
+    fi
+    
+    mv filetmp "$item"
+  
+    # Unset page_title
+    if ! [ "$page_title" = "" ]; then
+      unset page_title
+    fi
+
+    # Unset page vars
+    eval "$unset_vars"
+  fi
+done
+
+# Rename all dirs and files to web safe names
+makewebsafenames "$TARGETDIR"
+
+# If sitemap has been created, finalize it
+if [ -e "$TARGETDIR/sitemap.xml" ]; then
+  echo "</urlset>" >> "$TARGETDIR/sitemap.xml"
+fi
+
+# Create web server error files
+create_error_pages

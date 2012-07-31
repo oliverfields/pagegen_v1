@@ -1,0 +1,4 @@
+!the_image_src Alternative text no align!
+!<the_image_src Left aligned!
+!>the_image_src Right aligned!
+An image in some text !the_image_src Alt text!. Does this work then?

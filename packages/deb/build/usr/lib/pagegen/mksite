@@ -1,0 +1,214 @@
+#!/bin/bash
+
+#------------------------------------------------------------
+# Pagegen - static HTML site generator
+# Copyright (C) 2009  Oliver Fields, oliver@phnd.net
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------
+
+# Compile site
+
+if [ $# -lt 1 ]; then
+  echo "Usage: $(basename "$0") site_directory_name"
+  exit 1
+fi
+
+if ! [ -e "$PAGEGENDIR/$SITE/site.conf" ]; then
+  mkdir -p "$PAGEGENDIR/$SITE"
+  touch "$PAGEGENDIR/$SITE/site.conf"
+else
+  load_config_file $PAGEGENDIR/$SITE/site.conf 
+fi
+
+TIMESTAMP=$(date +%Y%m%d%H%M%S)
+export SOURCEDIR=$PAGEGENDIR/$SITE
+export TARGETDIR=$SOURCEDIR/site/$TIMESTAMP
+export PATH=$PAGEGEN_LIB_DIR:$PATH
+
+# Load site variable files
+if [ -e "$SOURCEDIR/content_variables" ]; then 
+  for var_file in $(ls "$SOURCEDIR/content_variables"); do
+    load_config_file "$SOURCEDIR/content_variables/$var_file"
+  done
+fi
+
+if ! [ -e "$SOURCEDIR" ]; then
+  echo "Error: $SOURCEDIR not found"
+  exit 1
+fi
+
+# Set default value
+if [ "$omit_sub_menu" = "" ]; then
+  omit_sub_menu=0
+fi
+
+# Set default value
+if [ "$omit_crumb_trail" = "" ]; then
+  omit_crumb_trail=0
+fi
+
+# IFS is by default set to spaces, becuse files and dirs may contain
+# spaces set IFS to new line instead
+IFS=$'\n'
+
+#Check site.conf exists else create
+if ! [ -e "$PAGEGENDIR/$SITE/site.conf" ]; then
+  echo "Creating $PAGEGENDIR/$SITE/site.conf"
+  touch $PAGEGENDIR/$SITE/site.conf
+fi
+#Check templates exist, if not create dummies
+if ! [ -e "$SOURCEDIR/templates" ]; then
+  echo "Creating $SOURCEDIR/templates"
+  mkdir $SOURCEDIR/templates
+fi
+if ! [ -e "$SOURCEDIR/templates/header" ]; then
+  echo "Creating default header template ($SOURCEDIR/templates/header)"
+  echo "<html><head><title>Pagegen</title></head><body>" > "$SOURCEDIR/templates/header"
+fi
+if ! [ -e "$SOURCEDIR/templates/footer" ]; then
+  echo "Creating default footer template ($SOURCEDIR/templates/footer)"
+  echo "</body></html>" > "$SOURCEDIR/templates/footer"
+fi
+if ! [ -e "$SOURCEDIR/templates/error_page_400" ]; then
+  echo "Creating 400_page template ($SOURCEDIR/templates/error_page_400)"
+  echo "#400 - Sorry, unable to respond to this request tyoe" > "$SOURCEDIR/templates/error_page_400"
+fi
+if ! [ -e "$SOURCEDIR/templates/error_page_403" ]; then
+  echo "Creating 403_page template ($SOURCEDIR/templates/error_page_403)"
+  echo "#403 - Sorry, permission denied" > "$SOURCEDIR/templates/error_page_403"
+fi
+if ! [ -e "$SOURCEDIR/templates/error_page_404" ]; then
+  echo "Creating 404_page template ($SOURCEDIR/templates/error_page_404)"
+  echo "#404 - Sorry, file not found" > "$SOURCEDIR/templates/error_page_404"
+fi
+if ! [ -e "$SOURCEDIR/templates/error_page_500" ]; then
+  echo "Creating 500_page template ($SOURCEDIR/templates/error_page_500)"
+  echo "#500 - Sorry, internal server error" > "$SOURCEDIR/templates/error_page_500"
+fi
+
+# Check site dir
+if ! [ -e "$SOURCEDIR/site" ]; then
+  echo "Creating $SOURCEDIR/site"
+  mkdir $SOURCEDIR/site
+fi
+
+if ! [ -e "$SOURCEDIR/content" ]; then
+  echo "Creating $SOURCEDIR/content"
+  mkdir $SOURCEDIR/content
+  echo "Creating default page ($SOURCEDIR/content/default)"
+  echo "h1 Welcome to pagegen" > $SOURCEDIR/content/default 
+fi
+
+# Create new site directory and copy content directory contents to it
+cp -r $SOURCEDIR/content $TARGETDIR
+
+# If option set, delete .svn directories from target dir
+if [ "$filter_svn_dirs" = "1" ]; then
+  find $TARGETDIR -name .svn -print0 | xargs -0 rm -rf
+fi
+
+# For each page in content add header, main menu, if apropriate, sub menu
+# and footer to the content and add page to new site dir w web safe name
+compilesite $omit_sub_menu $omit_crumb_trail
+
+# Copy site/include folder to live site dir
+if ! [ -e "$SOURCEDIR/include" ]; then
+  echo "Creating $SOURCEDIR/include"
+  mkdir "$SOURCEDIR/include"
+  echo "Creating $SOURCEDIR/include/css"
+  mkdir "$SOURCEDIR/include/css"
+  echo "Creating $SOURCEDIR/include/images"
+  mkdir "$SOURCEDIR/include/images"
+  echo "Creating $SOURCEDIR/include/javascript"
+  mkdir "$SOURCEDIR/include/javascript"
+  echo "Creating $SOURCEDIR/content_variables"
+  mkdir "$SOURCEDIR/content_variables"
+  # Create pagegen css
+  echo "Creating $SOURCEDIR/include/css/pagegen.css"
+  cat > "$SOURCEDIR/include/css/pagegen.css" <<EOFCSS
+/* Pagegen default styles for content */
+
+img.pg_img_left{
+float: left;
+margin: 0 1em 1em 0;
+}
+
+img.pg_img_right{
+float: right;
+margin: 0 0 1em 1em;
+}
+
+img.pg_img_center{
+margin: 0 auto;
+}
+
+p.pg_notice{
+border: solid 1px #999;
+}
+
+p.pg_warning{
+border: solid 1px #f00;
+}
+
+p.pg_quote{
+border: solid 1px #000;
+}
+
+th.pg_th_left, td.pg_td_left{
+text-align: left;
+}
+
+th.pg_th_right, td.pg_td_right{
+text-align: right;
+}
+
+th.pg_th_center, td.pg_td_center{
+text-align: center;
+}
+
+.pg_print_url{
+display: none;
+}
+EOFCSS
+fi
+
+# If symlinking the include dir must make sure not to remove
+# any .svn directories from it
+if [ "$symlink_site_include_dir" = "1" ]; then
+  echo "Warning: symlink_site_include_dir and filter_svn_dirs are both set, refusing to remove .svn directories from site include directory" 
+  ln -s "$SOURCEDIR/include" "$TARGETDIR/include"
+else
+  cp -R "$SOURCEDIR/include" "$TARGETDIR/include"
+  if [ "$filter_svn_dirs" = "1" ]; then
+    find $TARGETDIR/include -name .svn -print0 | xargs -0 rm -rf
+  fi
+fi
+
+# Move robots.txt to web root if exists
+if [ -e "$SOURCEDIR/templates/robots.txt" ]; then
+  cp "$SOURCEDIR/templates/robots.txt" "$TARGETDIR/."
+fi
+
+# Move .htaccess to web root if exists
+if [ -e "$SOURCEDIR/templates/.htaccess" ]; then
+  cp "$SOURCEDIR/templates/.htaccess" "$TARGETDIR/."
+fi
+
+# Replace 'live' sym link to point to new site dir
+if [ -e "$SOURCEDIR/site/live" ]; then
+  # Use unlink instead of rm here
+  unlink $SOURCEDIR/site/live
+fi
+ln -s $TARGETDIR $SOURCEDIR/site/live

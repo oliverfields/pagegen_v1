@@ -1,0 +1,12 @@
+#!/bin/bash
+# Setup environment for testing the content_variable-filter
+
+# Setup some test environment variables
+export test_var_1='Yay'
+export test_var_2='Hoi hoi!'
+export test_var_3='Go veggie'
+
+# Run test
+"$scripts_dir/test_filter" -f "$PAGEGEN_LIB_DIR/content_variable-filter" -t "$tests_dir/content_variable_filter" || exit 1
+
+exit 0

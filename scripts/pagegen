@@ -1,0 +1,118 @@
+#!/bin/bash
+
+#------------------------------------------------------------
+# Pagegen - static HTML site generator
+# Copyright (C) 2009  Oliver Fields, oliver@phnd.net
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------
+
+# Manage pagegen sites
+
+set -e
+
+config_file="/etc/pagegen.conf"
+
+# Set pagegen dir, if config file use value from that, else
+# default to ~/pagegen
+if [ -e ~/.pagegen.conf ]; then
+  . ~/.pagegen.conf
+  
+  if [ "$PAGEGENDIR" = "" ]; then
+    echo "PAGEGENDIR environment variable not set in ~/.pagegen.conf"
+    exit 1
+  fi
+
+  if ! [ -e "$PAGEGENDIR" ]; then
+    echo "PAGEGENDIR variable in ~/.pagegen.conf refers to $PAGEGENDIR, but the directory does not exist, please update PAGEGENDIR variable in ~/.pagegen.conf or create the $PAGEGENDIR directory"
+    exit 1
+  fi
+else
+  PAGEGENDIR="$HOME/pagegen"
+  if ! [ -e "$PAGEGENDIR" ]; then
+    echo "Pagegen could not find ~/.pagegen.conf, the default directory has been set to $PAGEGENDIR, however this directory does not exist, please create it or specify which directory to use by setting the PAGEGENDIR variable in '~/.pagegen.conf', e.g. PAGEGENDIR=/home/buffy/projects/pagegen"
+    exit 1
+  fi
+fi
+
+export PAGEGENDIR=$PAGEGENDIR
+
+function usage {
+  echo "Usage: $(basename $0) [ gen <site_name> | list | create <site_name> ]" >&2
+  exit 1
+}
+
+function load_config_file(){
+  file=$1
+  if [ -r "$file" ]; then
+    eval $(grep -v '^#' "$file" | sed 's/^/export\ /')
+  else
+    echo "Unable to read $file" >&2
+  fi
+}
+export -f load_config_file
+
+if [ -e "$config_file" ]; then
+  load_config_file "$config_file"
+else
+  # Assume lib dir is current dir
+  export PAGEGEN_LIB_DIR=$(cd ${0%/*} && pwd)
+fi
+
+if [ $# = 0 ]; then
+  usage
+fi
+
+# Handle parameters
+while [ $# -gt 0 ]; do
+  case $1 in
+    gen)
+      if [ "$2" = "" ] || [ $# -ne 2 ] ; then
+        usage
+      else
+        export SITE=$2
+
+        "$PAGEGEN_LIB_DIR/mksite" "$SITE"
+        shift 2
+      fi
+    ;;
+    list)
+       if [ $# -ne 1 ] ; then
+        usage
+      else
+        ls "$PAGEGENDIR"
+        shift 1
+      fi
+    ;;
+    new)
+      if [ "$2" = "" ] || [ $# -ne 2 ] ; then
+        usage
+      else
+        export SITE=$2
+        if [ $(ls "$PAGEGENDIR" | grep "^$SITE\$") ]; then
+          echo "Pagegen site $SITE already exists, aborting"
+        else 
+          "$PAGEGEN_LIB_DIR/mksite" "$SITE"
+        fi
+        shift 2
+      fi
+    ;;
+    *)
+      usage
+    ;;
+  esac
+done
+
+exit 0
+

@@ -1,0 +1,25 @@
+<div id="mainmenu">
+<ul>
+<li class="section_title">
+<a href="/">Home</a></li>
+<li class="section_selected">
+<a href="/dir-1/">Dir 1</a>
+<ul>
+<li><a href="/dir-1/dir-1/">Dir 1</a></li>
+<li><a class="item_selected" href="/dir-1/file-1">File 1</a></li>
+</ul>
+</li>
+<li class="section">
+<a href="/dir-2/">Dir 2</a>
+<ul>
+<li><a href="/dir-2/fil-som-innehaalder-rare-taegn">Fil som inneh&aring;lder rare t&aelig;gn</a></li>
+</ul>
+</li>
+<li class="section">
+<a href="/dir-3/">Dir 3</a>
+</li>
+<li class="section">
+<a href="/dir-4/">Dir 4</a>
+</li>
+</ul>
+</div><!-- /mainmenu -->

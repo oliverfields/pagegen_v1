@@ -1,0 +1,34 @@
+#!/bin/bash
+
+set -e
+
+if ! [ $# = 1 ]; then
+  echo "Usage: $(basename $0) version_number"
+  exit 1
+fi
+
+version=$1
+pagegen_dir=~/Documents/projects/current/pagegen
+package_dir=$pagegen_dir/packages/tar.gz
+build_dir=$pagegen_dir/packages/tar.gz/build
+download_file=pagegen_${version}.tar.gz
+
+# Tidy up or setup
+if [ -e "$build_dir" ]; then
+  rm -Rf $build_dir/*
+else
+  mkdir -p "build_dir"
+fi
+
+mkdir -p "$build_dir/pagegen_${version}"
+cd "$build_dir/pagegen_${version}"
+
+cp "$package_dir/include/COPYING" .
+cp "$package_dir/include/README" .
+cp -R $pagegen_dir/scripts/* .
+rm -Rf ".svn"
+
+cd "$build_dir" 
+
+tar -zcf "$download_file" "pagegen_${version}"
+mv "$download_file" "$package_dir/built/."

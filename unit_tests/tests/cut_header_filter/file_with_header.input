@@ -1,0 +1,6 @@
+hello=yes
+goodbye=no
+=====
+This should be the
+only content in
+the output
