@@ -49,7 +49,7 @@ fi
 export PAGEGENDIR=$PAGEGENDIR
 
 function usage {
-  echo "Usage: $(basename $0) [ gen <site_name> | list | create <site_name> ]" >&2
+  echo "Usage: $(basename $0) [ gen <site_name> | list | new <site_name> ]" >&2
   exit 1
 }
 
